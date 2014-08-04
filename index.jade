@@ -3,9 +3,16 @@ html(lang='en')
     head
         meta(charset='UTF-8')
         title Soundcloud playlist shuffle
-        //- link(rel='stylesheet', href='index.css')
+        link(rel='stylesheet', href='index.styl')
     body
         form
-            input(value='https://soundcloud.com/calvein/sets/songs')
+            input(value='https://soundcloud.com/calvein/sets/mixtapes')
+        .controls(hidden)
+            button.prev <<
+            button.play.pause >
+            b.title
+            button.next >>
+        ul
         script(src='http://127.0.0.1:35729/livereload.js')
         script(src='index.coffee')
+    
