@@ -1,16 +1,22 @@
 # App public ID
 ID = '5247b2c9dddfe7afb755c75a6198999d'
 
+# jQuery
+$ = (sel, parent = document) ->
+    parent.querySelector(sel)
+
 # Elements
-form = document.querySelector('form')
-input = document.querySelector('input')
-list = document.querySelector('ul')
-controls = document.querySelector('.controls')
-prev = document.querySelector('.prev')
-play = document.querySelector('.play')
-title = document.querySelector('.title')
-next = document.querySelector('.next')
+form = $('form')
+input = $('input')
+list = $('ul')
+controls = $('.controls')
+prev = $('.prev')
+play = $('.play')
+title = $('.title')
+next = $('.next')
 audio = new Audio()
+audio.controls = true
+form.appendChild(audio)
 
 currentTrack = null
 
@@ -51,7 +57,7 @@ playPause = ->
         audio.play()
 play.addEventListener('click', playPause)
 
-goTo = (el) ->
+goTo = (el, forcePlay) ->
     return unless el
     currentTrack.classList.remove('active')
     currentTrack = el
@@ -61,7 +67,7 @@ goTo = (el) ->
     data = currentTrack.__data__
     title.textContent = data.title
     # Is true when you change the src
-    isPlaying = !audio.paused
+    isPlaying = forcePlay or !audio.paused
     audio.src = data.src
     if isPlaying then audio.play()
 
@@ -77,13 +83,14 @@ prevTrack = ->
     goTo(currentTrack.previousSibling)
 prev.addEventListener('click', prevTrack)
 
-nextTrack = ->
-    goTo(currentTrack.nextSibling)
+nextTrack = (e) ->
+    goTo(currentTrack.nextSibling, e.type is 'ended')
 next.addEventListener('click', nextTrack)
 audio.addEventListener('ended', nextTrack)
 
 # Keyboard events
 document.addEventListener('keyup', (e) ->
+    return if $(':focus')
     switch e.which
         when 32 then playPause()
         when 37 then prevTrack()

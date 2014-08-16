@@ -2,7 +2,7 @@ doctype html
 html(lang='en')
     head
         meta(charset='UTF-8')
-        title Soundcloud playlist shuffle
+        title GHETTO SOUNDCLOUD
         link(rel='stylesheet', href='index.css')
     body
         form
@@ -13,5 +13,6 @@ html(lang='en')
             b.title
             button.next >>
         ul
-        script(src='http://127.0.0.1:35729/livereload.js')
-        script(src='index.coffee')
+        if env === 'dev'
+            script(src='http://127.0.0.1:35729/livereload.js')
+        script(src='index.js')
