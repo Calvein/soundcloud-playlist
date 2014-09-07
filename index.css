@@ -11,25 +11,27 @@ input {
   border-radius: 4px;
   font-size: 22px;
 }
-audio {
-  width: 100%;
-}
 .controls {
   text-align: center;
 }
-ul {
+audio {
+  width: 100%;
+}
+ul,
+figure {
   padding: 0;
   margin: 0;
 }
-li {
+.track {
+  position: relative;
   display: block;
   height: 110px;
   cursor: pointer;
 }
-li.active {
+.track.active {
   font-style: italic;
 }
-li img {
+.track img {
   float: left;
   width: 100px;
   height: 100px;
@@ -38,8 +40,16 @@ li img {
   border-radius: 4px;
   box-shadow: 0 0 4px rgba(0,0,0,0.2);
 }
-li span {
+.track span {
   display: block;
   color: #999;
   font-size: 14px;
+}
+.delete {
+  position: absolute;
+  top: 0;
+  right: 0;
+  font-size: 24px;
+  color: #000;
+  text-decoration: none;
 }

@@ -9,6 +9,7 @@ class Tracks extends View
 
     events:
         'click .track': 'clickTrack'
+        'click .delete': 'clickDelete'
 
     initialize: ->
         # Listeners #
@@ -18,7 +19,7 @@ class Tracks extends View
 
     # Listeners #
     setCurrent: (track) ->
-        track.$el.addClass('active')
+        track?.$el.addClass('active')
             .siblings('.active').removeClass('active')
 
     showTracks: (playlist) ->
@@ -46,5 +47,17 @@ class Tracks extends View
         track = $(e.currentTarget).data('track')
         @root().trigger('current:set', track)
 
+    clickDelete: (e) ->
+        e.preventDefault()
+        e.stopPropagation()
+
+        $track = $(e.currentTarget).parents('.track')
+
+        # If the current track is deleted, play the next one
+        if $track.hasClass('active')
+            track = $track.next().data('track')
+            @root().trigger('current:set', track)
+
+        $track.remove()
 
 module.exports = Tracks

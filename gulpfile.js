@@ -31,6 +31,11 @@ var handleError = function(err) {
 var coffeeFile = './src/index.coffee'
 var jadeFile = './src/index.jade'
 var stylusFile = './src/index.styl'
+// For watch
+var stylusFiles = [
+    stylusFile
+  , './src/app/components/**/*.styl'
+]
 
 /* Compile functions */
 // Watchify bundle
@@ -120,7 +125,7 @@ var watch = function() {
     })
 
     // Watch Stylus
-    gulp.watch(stylusFile, function() {
+    gulp.watch(stylusFiles, function() {
         styleCompile(function() {
             triggerLr('css')
         })

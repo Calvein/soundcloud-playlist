@@ -9,7 +9,6 @@ class Controls extends View
     events:
         'click .prev': 'prevTrack'
         'click .next': 'nextTrack'
-        'click .delete': 'clickDelete'
 
     initialize: ->
         @$el.html(tmpl())
@@ -38,9 +37,13 @@ class Controls extends View
     setCurrent: (track, forcePlay) ->
         @$el.removeAttr('hidden')
         @current = track
-        @$current = track.$el
 
-        @goTo(forcePlay)
+        if @current
+            @$current = track.$el
+            @goTo(forcePlay)
+        else
+            # Remove and pause
+            @audio.src = ''
 
 
     # Events #
