@@ -7,9 +7,9 @@ class Controls extends View
     namespace: 'controls'
 
     events:
-        '.prev click': 'prevTrack'
-        '.next click': 'nextTrack'
-        'audio ended': 'nextTrack'
+        'click .prev': 'prevTrack'
+        'click .next': 'nextTrack'
+        'click .delete': 'clickDelete'
 
     initialize: ->
         @$el.html(tmpl())
@@ -18,6 +18,9 @@ class Controls extends View
         @$title = @$('.title')
         @$audio = @$('audio')
         @audio = @$audio.get(0)
+
+        # Add non DOM events
+        @$audio.on('ended', @nextTrack.bind(@))
 
         # Listeners #
         @root().on('current:set', @setCurrent.bind(@))
@@ -43,12 +46,11 @@ class Controls extends View
     # Events #
     prevTrack: (e) ->
         track = @$current.prev().data('track')
-        @root().trigger('current:change', track)
-
+        @root().trigger('current:set', track)
 
     nextTrack: (e) ->
         track = @$current.next().data('track')
-        @root().trigger('current:change', track, e.type is 'ended')
+        @root().trigger('current:set', track, e.type is 'ended')
 
 
 module.exports = Controls
