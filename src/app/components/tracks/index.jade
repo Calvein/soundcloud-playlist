@@ -1,0 +1,6 @@
+for track in tracks
+    li.track: figure
+        img(src=track.artwork_url)
+        figcaption
+            span= track.user.username
+            b= track.title

@@ -1,0 +1,17 @@
+doctype html
+html(lang='en')
+    head
+        meta(charset='UTF-8')
+        title GHETTO SOUNDCLOUD
+        link(rel='stylesheet', href='index.css')
+        if env === 'dev'
+            script(src='http://127.0.0.1:35729/livereload.js')
+    body
+        form
+        .controls(hidden)
+        ul.tracks
+        - var suffix = 'js'
+        if env === 'dev'
+            - suffix = 'min.' + suffix
+        script(src='http://code.jquery.com/jquery-2.1.1.' + suffix)
+        script(src='app.js')

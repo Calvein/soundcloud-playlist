@@ -28,9 +28,9 @@ var handleError = function(err) {
 }
 
 /* Files */
-var coffeeFile = './app/index.coffee'
-var jadeFile = './app/index.jade'
-var stylusFile = './app/index.styl'
+var coffeeFile = './src/index.coffee'
+var jadeFile = './src/index.jade'
+var stylusFile = './src/index.styl'
 
 /* Compile functions */
 // Watchify bundle
@@ -55,11 +55,11 @@ var scriptCompile = function(cb) {
     }
 
     bundle.bundle()
-        .pipe(source('app.js'))
-        .pipe(gulp.dest('./'))
         .on('error', handleError)
-        .on('end', cb || function() {})
+        .pipe(source('app.js'))
         .pipe(duration('Reloading app'))
+        .pipe(gulp.dest('./'))
+        .on('end', cb || function() {})
 }
 
 var templateCompile = function(cb) {
@@ -71,19 +71,19 @@ var templateCompile = function(cb) {
         .pipe(jade({
             locals: locals
         }))
-        .pipe(gulp.dest('./'))
         .on('error', handleError)
-        .on('end', cb || function() {})
         .pipe(duration('Reloading template'))
+        .pipe(gulp.dest('./'))
+        .on('end', cb || function() {})
 }
 
 var styleCompile = function(cb) {
     gulp.src(stylusFile)
         .pipe(stylus())
-        .pipe(gulp.dest('./'))
         .on('error', handleError)
-        .on('end', cb || function() {})
         .pipe(duration('Reloading style'))
+        .pipe(gulp.dest('./'))
+        .on('end', cb || function() {})
 }
 
 var triggerLr = function (type) {
