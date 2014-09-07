@@ -1,31 +1,68 @@
 var gulp = require('gulp')
 var gutil = require('gulp-util')
-var coffee = require('gulp-coffee')
-var jade = require('gulp-jade')
-var stylus = require('gulp-stylus')
-
+var duration = require('gulp-duration')
+var source = require('vinyl-source-stream')
 var http = require('http')
 var connect = require('connect')
 var serveStatic = require('serve-static')
 var lr = require('tiny-lr')
+var growl = require('growl')
+
+// Script
+var watchify = require('watchify')
+var browserify = require('browserify')
+var coffeeify = require('coffeeify')
+var jadeify = require('browserify-jade').jade({ pretty: false })
+// Template
+var jade = require('gulp-jade')
+// Style
+var stylus = require('gulp-stylus')
 
 
+var port = 8080
+var portLr = 35729
 var env = gutil.env.prod ? 'prod' : 'dev'
-
-/* Files */
-var coffescriptFile = './app/*.coffee'
-var jadeFile = './app/*.jade'
-var stylusFile = './app/*.styl'
-
-/* Compile functions */
-var coffescriptCompile = function(cb) {
-    gulp.src(coffescriptFile)
-        .pipe(coffee({ bare: true }))
-        .pipe(gulp.dest('./'))
-        .on('end', cb || function() {})
+var handleError = function(err) {
+    gutil.log(err)
+    growl('Check your terminal.', { title: 'Gulp error' })
 }
 
-var jadeCompile = function(cb) {
+/* Files */
+var coffeeFile = './app/index.coffee'
+var jadeFile = './app/index.jade'
+var stylusFile = './app/index.styl'
+
+/* Compile functions */
+// Watchify bundle
+var bundle = null
+var scriptCompile = function(cb) {
+    if (!bundle) {
+        bundle = watchify(browserify(coffeeFile, {
+            extensions: ['.coffee']
+          , debug: env !== 'prod'
+            // Required for watchify
+          , cache: {}
+          , packageCache: {}
+          , fullPaths: true
+        }))
+        .transform(coffeeify)
+        .transform(jadeify)
+        .on('update', function() {
+            scriptCompile(function() {
+                triggerLr('all')
+            })
+        })
+    }
+
+    bundle.bundle()
+        .pipe(source('app.js'))
+        .pipe(gulp.dest('./'))
+        .on('error', handleError)
+        .on('end', cb || function() {})
+        .pipe(duration('Reloading app'))
+}
+
+var templateCompile = function(cb) {
     var locals = {
         env: env
     }
@@ -35,64 +72,63 @@ var jadeCompile = function(cb) {
             locals: locals
         }))
         .pipe(gulp.dest('./'))
+        .on('error', handleError)
         .on('end', cb || function() {})
+        .pipe(duration('Reloading template'))
 }
 
-var stylusCompile = function(cb) {
+var styleCompile = function(cb) {
     gulp.src(stylusFile)
         .pipe(stylus())
         .pipe(gulp.dest('./'))
+        .on('error', handleError)
         .on('end', cb || function() {})
+        .pipe(duration('Reloading style'))
 }
 
 var triggerLr = function (type) {
     var query = ''
-    if (type === 'all') query = 'files=index.html'
-    if (type === 'css') query = 'files=index.css'
+    if (type === 'all') query = '?files=index.html'
+    if (type === 'css') query = '?files=index.css'
 
-    http.get('http://127.0.0.1:35729/changed?' + query)
+    http.get('http://127.0.0.1:35729/changed' + query)
 }
 
+/* Tasks functions */
 var build = function() {
-    coffescriptCompile()
-    jadeCompile()
-    stylusCompile()
+    scriptCompile()
+    templateCompile()
+    styleCompile()
 }
 
-function serve() {
+var serve = function() {
     var app = connect()
         .use(serveStatic('./'))
 
     http.createServer(app)
-        .listen(8080, function(err) {
-            if (err) return handleError(err, cb)
-            gutil.log('Serving app on port', gutil.colors.yellow(8080))
+        .listen(port, function(err) {
+            gutil.log('Serving app on port', gutil.colors.yellow(port))
         })
 }
 
 var watch = function() {
     // Watch Jade
-    gulp.watch(coffescriptFile, function() {
-        coffescriptCompile(function() {
-            triggerLr('all')
-        })
-    })
-
-    // Watch Jade
     gulp.watch(jadeFile, function() {
-        coffescriptCompile(function() {
+        templateCompile(function() {
             triggerLr('all')
         })
     })
 
     // Watch Stylus
     gulp.watch(stylusFile, function() {
-        stylusCompile(function() {
+        styleCompile(function() {
             triggerLr('css')
         })
     })
 
-    lr().listen(35729)
+    lr().listen(portLr, function(err) {
+        gutil.log('Livereload on port', gutil.colors.yellow(portLr))
+    })
 }
 
 

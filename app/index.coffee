@@ -34,9 +34,21 @@ showTracks = (playlist) ->
 
     # Show tracklist
     for track in playlist.tracks
+        console.log track
         li = document.createElement('li')
-        li.textContent = track.title
         li.__data__ = track
+
+        img = document.createElement('img')
+        img.src = track.artwork_url
+        user = document.createElement('span')
+        user.textContent = track.user.username
+        title = document.createElement('b')
+        title.textContent = track.title
+
+        li.appendChild(img)
+        li.appendChild(user)
+        li.appendChild(title)
+
         list.appendChild(li)
 
     # Setup the first track
@@ -74,7 +86,8 @@ goTo = (el, forcePlay) ->
 # Play other song
 list.addEventListener('click', (e) ->
     el = e.target
-    return unless el.nodeName is 'LI'
+    until el.nodeName is 'LI'
+        el = el.parentElement
     goTo(el)
 )
 
@@ -98,8 +111,8 @@ document.addEventListener('keyup', (e) ->
 )
 
 # Submit playlist
-form.addEventListener('submit', (e) ->
-    e.preventDefault()
+submit = (e) ->
+    e?.preventDefault()
 
     # Build API URL
     uri = 'http://api.soundcloud.com/resolve.json'
@@ -120,10 +133,12 @@ form.addEventListener('submit', (e) ->
                 throw new Error('Has to be a playlist')
 
             # For conveniency
-            playlist.tracks.forEach((song) ->
-                song.src = song.stream_url + '?client_id=' + ID
+            playlist.tracks.forEach((track) ->
+                track.src = track.stream_url + '?client_id=' + ID
             )
 
             showTracks(playlist)
     xhr.send()
-)
+
+form.addEventListener('submit', submit)
+submit()

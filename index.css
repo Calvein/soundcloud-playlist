@@ -1,6 +1,7 @@
 body {
   width: 70%;
   margin: 0 auto;
+  font-family: sans-serif;
 }
 input {
   display: block;
@@ -22,8 +23,23 @@ ul {
 }
 li {
   display: block;
+  height: 110px;
   cursor: pointer;
 }
 li.active {
-  font-weight: bold;
+  font-style: italic;
+}
+li img {
+  float: left;
+  width: 100px;
+  height: 100px;
+  margin-right: 4px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-shadow: 0 0 4px rgba(0,0,0,0.2);
+}
+li span {
+  display: block;
+  color: #999;
+  font-size: 14px;
 }
