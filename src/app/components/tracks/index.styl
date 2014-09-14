@@ -6,13 +6,17 @@ figure
 .track
     position relative
     display block
-    height 110px
+    margin 10px 0
     cursor pointer
     &.active
         font-style italic
 
     img
-        float left
+    figcaption
+        display inline-block
+        vertical-align top
+
+    img
         width 100px
         height @width
         margin-right 4px

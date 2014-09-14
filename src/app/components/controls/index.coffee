@@ -7,8 +7,9 @@ class Controls extends View
     namespace: 'controls'
 
     events:
-        'click .prev': 'prevTrack'
-        'click .next': 'nextTrack'
+        'click [data-direction=prev]': 'prevTrack'
+        'click [data-direction=next]': 'nextTrack'
+        'click [data-type=shuffle]': 'shuffleTracks'
 
     initialize: ->
         @$el.html(tmpl())
@@ -27,8 +28,8 @@ class Controls extends View
     goTo: (forcePlay) ->
         # `audio.paused` is true when you change the src
         isPlaying = forcePlay or !@audio.paused
-        @$audio.attr('src', @current.src)
-        @$title.text(@current.title)
+        @$audio.attr('src', @current.get('src'))
+        @$title.text(@current.get('title'))
         if isPlaying
             @audio.play()
 
@@ -54,6 +55,12 @@ class Controls extends View
     nextTrack: (e) ->
         track = @$current.next().data('track')
         @root().trigger('current:set', track, e.type is 'ended')
+
+    shuffleTracks: (e) ->
+        @root().trigger('playlist:shuffle')
+
+        # Because we have to redraw the DOM
+        @$current = @current.$el
 
 
 module.exports = Controls

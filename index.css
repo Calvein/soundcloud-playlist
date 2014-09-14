@@ -25,14 +25,18 @@ figure {
 .track {
   position: relative;
   display: block;
-  height: 110px;
+  margin: 10px 0;
   cursor: pointer;
 }
 .track.active {
   font-style: italic;
 }
+.track img,
+.track figcaption {
+  display: inline-block;
+  vertical-align: top;
+}
 .track img {
-  float: left;
   width: 100px;
   height: 100px;
   margin-right: 4px;
