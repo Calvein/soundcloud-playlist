@@ -6,6 +6,9 @@ Tracks = require('./components/tracks')
 class App extends View
     namespace: 'app'
 
+    events:
+        'keydown': 'keydown'
+
     initialize: ->
         # Init components
         @form = new Form(
@@ -25,6 +28,11 @@ class App extends View
 
         # Get default playlist
         @trigger('playlist:get')
+
+
+    # Events #
+    keydown: (e) ->
+        @trigger('keydown', e)
 
 
 module.exports = App

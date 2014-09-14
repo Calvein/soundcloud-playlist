@@ -24,6 +24,7 @@ class Controls extends View
 
         # Listeners #
         @root().on('current:set', @setCurrent.bind(@))
+        @root().on('keydown', @keydown.bind(@))
 
     goTo: (forcePlay) ->
         # `audio.paused` is true when you change the src
@@ -32,6 +33,9 @@ class Controls extends View
         @$title.text(@current.get('title'))
         if isPlaying
             @audio.play()
+
+    togglePlay: ->
+        if @audio.paused then @audio.play() else @audio.pause()
 
 
     # Listeners #
@@ -45,6 +49,12 @@ class Controls extends View
         else
             # Remove and pause
             @audio.src = ''
+
+    keydown: (e) ->
+        # space: toggle play/pause
+        if e.keyCode is 32 and $(':focus').length is 0
+            e.preventDefault()
+            @togglePlay()
 
 
     # Events #

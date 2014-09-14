@@ -4211,7 +4211,8 @@ Controls = (function(_super) {
     this.$audio = this.$('audio');
     this.audio = this.$audio.get(0);
     this.$audio.on('ended', this.nextTrack.bind(this));
-    return this.root().on('current:set', this.setCurrent.bind(this));
+    this.root().on('current:set', this.setCurrent.bind(this));
+    return this.root().on('keydown', this.keydown.bind(this));
   };
 
   Controls.prototype.goTo = function(forcePlay) {
@@ -4224,6 +4225,14 @@ Controls = (function(_super) {
     }
   };
 
+  Controls.prototype.togglePlay = function() {
+    if (this.audio.paused) {
+      return this.audio.play();
+    } else {
+      return this.audio.pause();
+    }
+  };
+
   Controls.prototype.setCurrent = function(track, forcePlay) {
     this.$el.removeAttr('hidden');
     this.current = track;
@@ -4232,6 +4241,13 @@ Controls = (function(_super) {
       return this.goTo(forcePlay);
     } else {
       return this.audio.src = '';
+    }
+  };
+
+  Controls.prototype.keydown = function(e) {
+    if (e.keyCode === 32 && $(':focus').length === 0) {
+      e.preventDefault();
+      return this.togglePlay();
     }
   };
 
@@ -4635,6 +4651,10 @@ App = (function(_super) {
 
   App.prototype.namespace = 'app';
 
+  App.prototype.events = {
+    'keydown': 'keydown'
+  };
+
   App.prototype.initialize = function() {
     this.form = new Form({
       el: this.$('form'),
@@ -4649,6 +4669,10 @@ App = (function(_super) {
       parent: this
     });
     return this.trigger('playlist:get');
+  };
+
+  App.prototype.keydown = function(e) {
+    return this.trigger('keydown', e);
   };
 
   return App;
