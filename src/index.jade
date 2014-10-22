@@ -11,7 +11,7 @@ html(lang='en')
         .controls(hidden)
         ul.tracks
         - var suffix = 'js'
-        if env === 'dev'
+        if env !== 'dev'
             - suffix = 'min.' + suffix
         script(src='http://code.jquery.com/jquery-2.1.1.' + suffix)
         script(src='app.js')

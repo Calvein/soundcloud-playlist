@@ -45,7 +45,7 @@ class Tracks extends View
 
     showPlaylist: (playlist) ->
         @tracks.add(playlist.tracks)
-        @showTracks(@tracks.shuffle(), true)
+        @showTracks(@tracks.models.reverse(), true)
 
     shuffleTracks: ->
         @showTracks(@tracks.shuffle())

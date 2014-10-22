@@ -2,6 +2,6 @@ for track in tracks
     li(data-id=track.id).track: figure
         img(src=track.get('artwork_url'))
         figcaption
-            span= track.get('username')
+            span= track.get('user').username
             b= track.get('title')
         a(href='#').delete ×

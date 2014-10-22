@@ -4468,7 +4468,7 @@ Tracks = (function(_super) {
 
   Tracks.prototype.showPlaylist = function(playlist) {
     this.tracks.add(playlist.tracks);
-    return this.showTracks(this.tracks.shuffle(), true);
+    return this.showTracks(this.tracks.models.reverse(), true);
   };
 
   Tracks.prototype.shuffleTracks = function() {
@@ -4535,7 +4535,7 @@ buf.push("<img" + (jade.attr("src", track.get('artwork_url'), true, false)) + "/
 buf.push("<figcaption>");
 
 
-buf.push("<span>" + (jade.escape(null == (jade_interp = track.get('username')) ? "" : jade_interp)));
+buf.push("<span>" + (jade.escape(null == (jade_interp = track.get('user').username) ? "" : jade_interp)));
 
 
 buf.push("</span>");
@@ -4586,7 +4586,7 @@ buf.push("<img" + (jade.attr("src", track.get('artwork_url'), true, false)) + "/
 buf.push("<figcaption>");
 
 
-buf.push("<span>" + (jade.escape(null == (jade_interp = track.get('username')) ? "" : jade_interp)));
+buf.push("<span>" + (jade.escape(null == (jade_interp = track.get('user').username) ? "" : jade_interp)));
 
 
 buf.push("</span>");
@@ -4624,7 +4624,7 @@ buf.push("</li>");
 
 }.call(this,"tracks" in locals_for_with?locals_for_with.tracks:typeof tracks!=="undefined"?tracks:undefined,"undefined" in locals_for_with?locals_for_with.undefined:typeof undefined!=="undefined"?undefined:undefined));;return buf.join("");
 } catch (err) {
-  jade.rethrow(err, jade_debug[0].filename, jade_debug[0].lineno, "for track in tracks\n    li(data-id=track.id).track: figure\n        img(src=track.get('artwork_url'))\n        figcaption\n            span= track.get('username')\n            b= track.get('title')\n        a(href='#').delete ×\n");
+  jade.rethrow(err, jade_debug[0].filename, jade_debug[0].lineno, "for track in tracks\n    li(data-id=track.id).track: figure\n        img(src=track.get('artwork_url'))\n        figcaption\n            span= track.get('user').username\n            b= track.get('title')\n        a(href='#').delete ×\n");
 }
 }
 )(params); }
