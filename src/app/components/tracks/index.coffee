@@ -10,18 +10,18 @@ class Tracks extends View
     namespace: 'tracks'
 
     events:
-        'click .track': 'clickTrack'
-        'click .delete': 'clickDelete'
+        'click .track-play': 'clickTrackPlay'
+        'click .track-delete': 'clickTrackDelete'
 
     initialize: ->
         @tracks = new TracksCollection()
 
         # Listeners #
-        @root().on('current:set', @setCurrent.bind(@))
-        @root().on('playlist:new', @showPlaylist.bind(@))
-        @root().on('playlist:shuffle', @shuffleTracks.bind(@))
+        @listenTo(@root(), 'current:set', @setCurrent)
+        @listenTo(@root(), 'playlist:new', @showPlaylist)
+        @listenTo(@root(), 'playlist:shuffle', @shuffleTracks)
 
-    showTracks: (tracks, showFirst) ->
+    showTracks: (tracks) ->
         @$el.html(tmpl(
             tracks: tracks
         ))
@@ -34,9 +34,6 @@ class Tracks extends View
             track.$el = $track
             $track.data('track', track)
 
-        if showFirst
-            @root().trigger('current:set', tracks[0])
-
 
     # Listeners #
     setCurrent: (track) ->
@@ -45,18 +42,30 @@ class Tracks extends View
 
     showPlaylist: (playlist) ->
         @tracks.add(playlist.tracks)
-        @showTracks(@tracks.models.reverse(), true)
+        # Show the last added first
+        @showTracks(@tracks.models.reverse())
 
     shuffleTracks: ->
         @showTracks(@tracks.shuffle())
 
 
     # Events #
-    clickTrack: (e) ->
-        track = $(e.currentTarget).data('track')
-        @root().trigger('current:set', track)
+    clickTrackPlay: (e) ->
+        e.stopPropagation()
+        $el = $(e.currentTarget)
+        $track = $(e.currentTarget).parents('.track')
+        if $track.hasClass('active') and @root().isPlaying
+            @root().trigger('pause')
+            $el.removeClass('playing')
+        else
+            # Swap icons
+            @$('.track-play').removeClass('playing')
+            $el.addClass('playing')
+            track = $track.data('track')
+            @root().trigger('current:set', track)
+            @root().trigger('play')
 
-    clickDelete: (e) ->
+    clickTrackDelete: (e) ->
         e.preventDefault()
         e.stopPropagation()
 

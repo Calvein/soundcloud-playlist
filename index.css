@@ -1,8 +1,27 @@
+/* Variables */
+/* Resets */
+*,
+*:before,
+*:after {
+  box-sizing: border-box;
+}
+ul,
+figure {
+  padding: 0;
+  margin: 0;
+}
+/* Style */
 body {
   max-width: 1200px;
-  width: 70%;
+  width: 80%;
   margin: 0 auto;
   font-family: sans-serif;
+}
+@media (max-width: 800px) {
+  body {
+    width: 100%;
+    padding: 0 20px;
+  }
 }
 input {
   display: block;
@@ -13,21 +32,43 @@ input {
   font-size: 22px;
 }
 .controls {
+  position: fixed;
+  width: 300px;
+  bottom: 0;
+  right: 10%;
+  background: #fff;
   text-align: center;
+  z-index: 1;
 }
-audio {
+.controls audio {
+  display: block;
   width: 100%;
 }
-ul,
-figure {
-  padding: 0;
-  margin: 0;
+.controls button {
+  display: inline-block;
+  width: 30px;
+}
+.controls-title {
+  display: inline-block;
+  vertical-align: bottom;
+  width: 200px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+@media (max-width: 800px) {
+  .controls {
+    width: 100%;
+    right: 0;
+  }
+  .controls-title {
+    width: calc(100% - 90px);
+  }
 }
 .track {
   position: relative;
   display: block;
   margin: 10px 0;
-  cursor: pointer;
 }
 .track.active {
   font-style: italic;
@@ -50,7 +91,26 @@ figure {
   color: #999;
   font-size: 14px;
 }
-.delete {
+.track-play,
+.track-details {
+  display: inline-block;
+  vertical-align: top;
+}
+.track-play {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  margin-right: 10px;
+  font-size: 24px;
+  cursor: pointer;
+}
+.track-play:before {
+  content: '>';
+}
+.track-play.playing:before {
+  content: '||';
+}
+.track-delete {
   position: absolute;
   top: 0;
   right: 0;

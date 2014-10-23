@@ -29,6 +29,7 @@ class App extends View
         # Get default playlist
         @trigger('playlist:get')
 
+    isPlaying: -> !@controls.audio.paused
 
     # Events #
     keydown: (e) ->

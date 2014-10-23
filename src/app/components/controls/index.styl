@@ -1,5 +1,33 @@
 .controls
+    position fixed
+    width 300px
+    bottom 0
+    right 10%
+    background white
     text-align center
+    z-index 1
 
-audio
-    width 100%
+    audio
+        display block
+        width 100%
+
+    button
+        display inline-block
+        width 30px
+
+    // .controls-title
+    &-title
+        display inline-block
+        vertical-align bottom
+        width 200px
+        white-space nowrap
+        overflow hidden
+        text-overflow ellipsis
+
+    @media small
+        width 100%
+        right 0
+
+        // .controls-title
+        &-title
+            width calc(100% - 90px)

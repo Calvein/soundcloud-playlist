@@ -18,7 +18,7 @@ class Form extends View
         ))
 
         # Listeners #
-        @root().on('playlist:get', @submit.bind(@))
+        @listenTo(@root(), 'playlist:get', @submit)
 
     getPlaylist: (url) ->
         api.getPlaylist(url).done((playlist) =>

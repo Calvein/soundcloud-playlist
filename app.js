@@ -4207,12 +4207,14 @@ Controls = (function(_super) {
 
   Controls.prototype.initialize = function() {
     this.$el.html(tmpl());
-    this.$title = this.$('.title');
+    this.$title = this.$('.controls-title');
     this.$audio = this.$('audio');
     this.audio = this.$audio.get(0);
     this.$audio.on('ended', this.nextTrack.bind(this));
-    this.root().on('current:set', this.setCurrent.bind(this));
-    return this.root().on('keydown', this.keydown.bind(this));
+    this.listenTo(this.root(), 'current:set', this.setCurrent);
+    this.listenTo(this.root(), 'play', this.play);
+    this.listenTo(this.root(), 'pause', this.pause);
+    return this.listenTo(this.root(), 'keydown', this.keydown);
   };
 
   Controls.prototype.goTo = function(forcePlay) {
@@ -4231,6 +4233,14 @@ Controls = (function(_super) {
     } else {
       return this.audio.pause();
     }
+  };
+
+  Controls.prototype.play = function() {
+    return this.audio.play();
+  };
+
+  Controls.prototype.pause = function() {
+    return this.audio.pause();
   };
 
   Controls.prototype.setCurrent = function(track, forcePlay) {
@@ -4303,7 +4313,7 @@ buf.push("<<");
 buf.push("</button>");
 
 
-buf.push("<b class=\"title\">");
+buf.push("<b class=\"controls-title\">");
 
 
 buf.push("</b>");
@@ -4328,7 +4338,7 @@ buf.push("</button>");
 
 }.call(this,"undefined" in locals_for_with?locals_for_with.undefined:typeof undefined!=="undefined"?undefined:undefined));;return buf.join("");
 } catch (err) {
-  jade.rethrow(err, jade_debug[0].filename, jade_debug[0].lineno, "audio(controls)\nbutton(data-direction='prev') <<\nb.title\nbutton(data-direction='next') >>\nbutton(data-type='shuffle') ⤭");
+  jade.rethrow(err, jade_debug[0].filename, jade_debug[0].lineno, "audio(controls)\nbutton(data-direction='prev') <<\nb.controls-title\nbutton(data-direction='next') >>\nbutton(data-type='shuffle') ⤭");
 }
 }
 )(params); }
@@ -4363,7 +4373,7 @@ Form = (function(_super) {
     this.$el.html(tmpl({
       url: url
     }));
-    return this.root().on('playlist:get', this.submit.bind(this));
+    return this.listenTo(this.root(), 'playlist:get', this.submit);
   };
 
   Form.prototype.getPlaylist = function(url) {
@@ -4433,33 +4443,32 @@ Tracks = (function(_super) {
   Tracks.prototype.namespace = 'tracks';
 
   Tracks.prototype.events = {
-    'click .track': 'clickTrack',
-    'click .delete': 'clickDelete'
+    'click .track-play': 'clickTrackPlay',
+    'click .track-delete': 'clickTrackDelete'
   };
 
   Tracks.prototype.initialize = function() {
     this.tracks = new TracksCollection();
-    this.root().on('current:set', this.setCurrent.bind(this));
-    this.root().on('playlist:new', this.showPlaylist.bind(this));
-    return this.root().on('playlist:shuffle', this.shuffleTracks.bind(this));
+    this.listenTo(this.root(), 'current:set', this.setCurrent);
+    this.listenTo(this.root(), 'playlist:new', this.showPlaylist);
+    return this.listenTo(this.root(), 'playlist:shuffle', this.shuffleTracks);
   };
 
-  Tracks.prototype.showTracks = function(tracks, showFirst) {
-    var $track, el, track, _i, _len, _ref;
+  Tracks.prototype.showTracks = function(tracks) {
+    var $track, el, track, _i, _len, _ref, _results;
     this.$el.html(tmpl({
       tracks: tracks
     }));
     _ref = this.$('.track');
+    _results = [];
     for (_i = 0, _len = _ref.length; _i < _len; _i++) {
       el = _ref[_i];
       $track = $(el);
       track = this.tracks.get($track.data('id'));
       track.$el = $track;
-      $track.data('track', track);
+      _results.push($track.data('track', track));
     }
-    if (showFirst) {
-      return this.root().trigger('current:set', tracks[0]);
-    }
+    return _results;
   };
 
   Tracks.prototype.setCurrent = function(track) {
@@ -4468,20 +4477,31 @@ Tracks = (function(_super) {
 
   Tracks.prototype.showPlaylist = function(playlist) {
     this.tracks.add(playlist.tracks);
-    return this.showTracks(this.tracks.models.reverse(), true);
+    return this.showTracks(this.tracks.models.reverse());
   };
 
   Tracks.prototype.shuffleTracks = function() {
     return this.showTracks(this.tracks.shuffle());
   };
 
-  Tracks.prototype.clickTrack = function(e) {
-    var track;
-    track = $(e.currentTarget).data('track');
-    return this.root().trigger('current:set', track);
+  Tracks.prototype.clickTrackPlay = function(e) {
+    var $el, $track, track;
+    e.stopPropagation();
+    $el = $(e.currentTarget);
+    $track = $(e.currentTarget).parents('.track');
+    if ($track.hasClass('active') && this.root().isPlaying) {
+      this.root().trigger('pause');
+      return $el.removeClass('playing');
+    } else {
+      this.$('.track-play').removeClass('playing');
+      $el.addClass('playing');
+      track = $track.data('track');
+      this.root().trigger('current:set', track);
+      return this.root().trigger('play');
+    }
   };
 
-  Tracks.prototype.clickDelete = function(e) {
+  Tracks.prototype.clickTrackDelete = function(e) {
     var $track, track;
     e.preventDefault();
     e.stopPropagation();
@@ -4529,13 +4549,22 @@ buf.push("<li" + (jade.attr("data-id", track.id, true, false)) + " class=\"track
 buf.push("<figure>");
 
 
-buf.push("<img" + (jade.attr("src", track.get('artwork_url'), true, false)) + "/>");
+buf.push("<img" + (jade.attr("src", track.getImage(), true, false)) + "/>");
 
 
 buf.push("<figcaption>");
 
 
-buf.push("<span>" + (jade.escape(null == (jade_interp = track.get('user').username) ? "" : jade_interp)));
+buf.push("<button class=\"track-play\">");
+
+
+buf.push("</button>");
+
+
+buf.push("<div class=\"track-details\">");
+
+
+buf.push("<span>" + (jade.escape(null == (jade_interp = track.getUsername()) ? "" : jade_interp)));
 
 
 buf.push("</span>");
@@ -4547,10 +4576,13 @@ buf.push("<b>" + (jade.escape(null == (jade_interp = track.get('title')) ? "" : 
 buf.push("</b>");
 
 
+buf.push("</div>");
+
+
 buf.push("</figcaption>");
 
 
-buf.push("<a href=\"#\" class=\"delete\">");
+buf.push("<a href=\"#\" class=\"track-delete\">");
 
 
 buf.push("×");
@@ -4580,13 +4612,22 @@ buf.push("<li" + (jade.attr("data-id", track.id, true, false)) + " class=\"track
 buf.push("<figure>");
 
 
-buf.push("<img" + (jade.attr("src", track.get('artwork_url'), true, false)) + "/>");
+buf.push("<img" + (jade.attr("src", track.getImage(), true, false)) + "/>");
 
 
 buf.push("<figcaption>");
 
 
-buf.push("<span>" + (jade.escape(null == (jade_interp = track.get('user').username) ? "" : jade_interp)));
+buf.push("<button class=\"track-play\">");
+
+
+buf.push("</button>");
+
+
+buf.push("<div class=\"track-details\">");
+
+
+buf.push("<span>" + (jade.escape(null == (jade_interp = track.getUsername()) ? "" : jade_interp)));
 
 
 buf.push("</span>");
@@ -4598,10 +4639,13 @@ buf.push("<b>" + (jade.escape(null == (jade_interp = track.get('title')) ? "" : 
 buf.push("</b>");
 
 
+buf.push("</div>");
+
+
 buf.push("</figcaption>");
 
 
-buf.push("<a href=\"#\" class=\"delete\">");
+buf.push("<a href=\"#\" class=\"track-delete\">");
 
 
 buf.push("×");
@@ -4624,7 +4668,7 @@ buf.push("</li>");
 
 }.call(this,"tracks" in locals_for_with?locals_for_with.tracks:typeof tracks!=="undefined"?tracks:undefined,"undefined" in locals_for_with?locals_for_with.undefined:typeof undefined!=="undefined"?undefined:undefined));;return buf.join("");
 } catch (err) {
-  jade.rethrow(err, jade_debug[0].filename, jade_debug[0].lineno, "for track in tracks\n    li(data-id=track.id).track: figure\n        img(src=track.get('artwork_url'))\n        figcaption\n            span= track.get('user').username\n            b= track.get('title')\n        a(href='#').delete ×\n");
+  jade.rethrow(err, jade_debug[0].filename, jade_debug[0].lineno, "for track in tracks\n    li(data-id=track.id).track: figure\n        img(src=track.getImage())\n        figcaption\n            button.track-play\n            .track-details\n                span= track.getUsername()\n                b= track.get('title')\n        a(href='#').track-delete ×\n");
 }
 }
 )(params); }
@@ -4671,6 +4715,10 @@ App = (function(_super) {
     return this.trigger('playlist:get');
   };
 
+  App.prototype.isPlaying = function() {
+    return !this.controls.audio.paused;
+  };
+
   App.prototype.keydown = function(e) {
     return this.trigger('keydown', e);
   };
@@ -4696,6 +4744,19 @@ Track = (function(_super) {
   function Track() {
     return Track.__super__.constructor.apply(this, arguments);
   }
+
+  Track.prototype.getImage = function() {
+    var url;
+    url = this.get('artwork_url');
+    if (!url) {
+      url = this.get('user').avatar_url;
+    }
+    return url;
+  };
+
+  Track.prototype.getUsername = function() {
+    return this.get('user').username;
+  };
 
   return Track;
 

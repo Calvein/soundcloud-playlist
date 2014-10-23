@@ -15,7 +15,7 @@ class Controls extends View
         @$el.html(tmpl())
 
         # Init resusable elements
-        @$title = @$('.title')
+        @$title = @$('.controls-title')
         @$audio = @$('audio')
         @audio = @$audio.get(0)
 
@@ -23,8 +23,10 @@ class Controls extends View
         @$audio.on('ended', @nextTrack.bind(@))
 
         # Listeners #
-        @root().on('current:set', @setCurrent.bind(@))
-        @root().on('keydown', @keydown.bind(@))
+        @listenTo(@root(), 'current:set', @setCurrent)
+        @listenTo(@root(), 'play', @play)
+        @listenTo(@root(), 'pause', @pause)
+        @listenTo(@root(), 'keydown', @keydown)
 
     goTo: (forcePlay) ->
         # `audio.paused` is true when you change the src
@@ -39,6 +41,10 @@ class Controls extends View
 
 
     # Listeners #
+    play: -> @audio.play()
+
+    pause: -> @audio.pause()
+
     setCurrent: (track, forcePlay) ->
         @$el.removeAttr('hidden')
         @current = track
