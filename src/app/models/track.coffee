@@ -9,6 +9,11 @@ class Track extends Model
             url = @get('user').avatar_url
         return url
 
+    getUrl: (type='track') ->
+        switch type
+            when 'track' then @get('permalink_url')
+            when 'user' then @get('user').permalink_url
+
     getUsername: -> @get('user').username
 
 module.exports = Track

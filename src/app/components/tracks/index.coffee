@@ -22,6 +22,7 @@ class Tracks extends View
         @listenTo(@root(), 'playlist:shuffle', @shuffleTracks)
 
     showTracks: (tracks) ->
+        console.log tracks
         @$el.html(tmpl(
             tracks: tracks
         ))

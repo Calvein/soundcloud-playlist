@@ -4,6 +4,6 @@ for track in tracks
         figcaption
             button.track-play
             .track-details
-                span= track.getUsername()
-                b= track.get('title')
+                a.track-details-user(href=track.getUrl('user'))= track.getUsername()
+                a.track-details-title(href=track.getUrl())= track.get('title')
         a(href='#').track-delete ×
