@@ -58,7 +58,8 @@ class Controls extends View
 
     keydown: (e) ->
         # space: toggle play/pause
-        if e.keyCode is 32 and $(':focus').length is 0
+        # Not when focus, except when on a play/pause button
+        if e.keyCode is 32 and $(':focus:not(.track-play)').length is 0
             e.preventDefault()
             @togglePlay()
 
