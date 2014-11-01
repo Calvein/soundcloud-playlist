@@ -1,4 +1,5 @@
 Model = require('bamjs/model')
+api = require('../modules/api')
 
 
 class Track extends Model
@@ -15,5 +16,10 @@ class Track extends Model
             when 'user' then @get('user').permalink_url
 
     getUsername: -> @get('user').username
+
+    isDownloadable: -> @get('downloadable')
+
+    getDownloadUrl: -> api.getTrackDownloadUrl(@)
+
 
 module.exports = Track

@@ -4,6 +4,17 @@ for track in tracks
         figcaption
             button.track-play
             .track-details
-                a.track-details-user(href=track.getUrl('user'))= track.getUsername()
-                a.track-details-title(href=track.getUrl())= track.get('title')
-        a(href='#').track-delete ×
+                a(href=track.getUrl('user')).track-details-user= track.getUsername()
+                a(href=track.getUrl()).track-details-title= track.get('title')
+        .track-links
+            if track.isDownloadable()
+                a(
+                    href=track.getDownloadUrl()
+                    data-link='download'
+                    title='Download track'
+                ) ⬇
+            a(
+                href='#'
+                data-link='delete'
+                title='Remove track from queue'
+            ) ×
