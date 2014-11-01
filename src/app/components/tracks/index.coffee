@@ -38,8 +38,12 @@ class Tracks extends View
 
     # Listeners #
     setCurrent: (track) ->
-        track?.$el.addClass('active')
+        return unless track
+        track.$el.addClass('active')
             .siblings('.active').removeClass('active')
+
+        @$('.track-play.playing').removeClass('playing')
+        track.$el.find('.track-play').addClass('playing')
 
     showPlaylist: (playlist) ->
         @tracks.add(playlist.tracks)

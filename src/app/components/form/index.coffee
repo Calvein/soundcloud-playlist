@@ -12,7 +12,7 @@ class Form extends View
 
     initialize: ->
         # TODO get in localstorage
-        url = 'https://soundcloud.com/calvein/sets/mixtapes'
+        url = 'https://soundcloud.com/calvein/sets/songs'
         @$el.html(tmpl(
             url: url
         ))
