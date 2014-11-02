@@ -37,13 +37,18 @@ class Controls extends View
         @listenTo(@root(), 'audio:play', @play)
         @listenTo(@root(), 'audio:pause', @pause)
         @listenTo(@root(), 'audio:seek', @seek)
+        @listenTo(@root(), 'audio:timeupdate', @timeupdate)
         @listenTo(@root(), 'keydown', @keydown)
 
     goTo: (forcePlay) ->
+        @$title.text(@currentTrack.get('title'))
         # `audio.paused` is true when you change the src
         isPlaying = forcePlay or !@audio.paused
+        @$audio.one('canplaythrough', =>
+            console.log @currentTrack.get('currentTime')
+            @seek(@currentTrack.get('currentTime'))
+        )
         @$audio.attr('src', @currentTrack.get('src'))
-        @$title.text(@currentTrack.get('title'))
         if isPlaying
             @audio.play()
 
@@ -52,12 +57,6 @@ class Controls extends View
 
 
     # Listeners #
-    play: -> @audio.play()
-
-    pause: -> @audio.pause()
-
-    seek: (time) -> @audio.currentTime = time
-
     setCurrent: (track, forcePlay) ->
         return if @currentTrack is track
         @$el.removeAttr('hidden')
@@ -70,20 +69,34 @@ class Controls extends View
             # Remove and pause
             @audio.src = ''
 
+    play: -> @audio.play()
+
+    pause: -> @audio.pause()
+
+    seek: (time) -> @audio.currentTime = time
+
+    timeupdate: -> @currentTrack.set('currentTime', @audio.currentTime)
+
     keydown: (e) ->
         # space: toggle play/pause
         # Not when focus, except when on a play/pause button
         if e.keyCode is 32 and $(':focus:not(.track-play)').length is 0
             e.preventDefault()
             @togglePlay()
+        # J => prev
+        else if e.keyCode is 74
+            @prevTrack()
+        # K => next
+        else if e.keyCode is 75
+            @nextTrack()
 
 
     # Events #
-    prevTrack: (e) ->
+    prevTrack: (e = {}) ->
         track = @$currentTrack.prev().data('track')
         @root().trigger('tracks:set', track)
 
-    nextTrack: (e) ->
+    nextTrack: (e = {}) ->
         track = @$currentTrack.next().data('track')
         @root().trigger('tracks:set', track, e.type is 'ended')
 

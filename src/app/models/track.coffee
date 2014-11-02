@@ -5,6 +5,8 @@ api = require('../modules/api')
 class Track extends Model
 
     idAttribute: 'id'
+    defaults:
+        currentTime: 0
 
     getImage: ->
         url = @get('artwork_url')

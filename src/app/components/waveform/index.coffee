@@ -101,17 +101,13 @@ class Waveform extends View
 
     # Events #
     click: (e) ->
-        @root().trigger('tracks:set', @model)
-
-        done = =>
-            @root().$audio.off('canplaythrough')
+        @root().$audio.one('canplaythrough', =>
             time = @trackScale.invert(e.offsetX / @width) / 10
             @root().trigger('audio:seek', time)
             @root().trigger('audio:play')
+        )
 
-        # When it's ready or if it's ready (can be too fast)
-        @root().$audio.one('canplaythrough', done)
-        done() if @root().audio.readyState > 3
+        @root().trigger('tracks:set', @model)
 
 
 module.exports = Waveform
