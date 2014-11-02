@@ -3404,8 +3404,8 @@ window.app = new App({
 
 
     /*
-    Override so our _routes object is unique to each router. I hate this side of
-    js.
+    Override so our _routes object is unique to each router.
+    I hate this side of js.
      */
 
     function Router() {
@@ -3598,6 +3598,9 @@ window.app = new App({
 
     function View(options) {
       var _ref1;
+      if (options == null) {
+        options = {};
+      }
       this.children = [];
       if (options.className) {
         this.className = options.className;
@@ -3723,6 +3726,11 @@ window.app = new App({
       return false;
     };
 
+
+    /*
+    Removing children
+     */
+
     View.prototype.removeChild = function(child) {
       this.children = without(this.children, child);
       return child.parent = null;
@@ -3783,7 +3791,21 @@ window.app = new App({
         args[0] = this.namespace + '.' + args[0];
       }
       if (this.parent) {
-        return this.parent.trigger.apply(this.parent, args);
+        return this.parent._bubbleTrigger.apply(this.parent, args);
+      }
+    };
+
+
+    /*
+    Used when bubbling to prevent namespace pollution as it goes up the chain.
+     */
+
+    View.prototype._bubbleTrigger = function() {
+      var args;
+      args = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+      Backbone.View.prototype.trigger.apply(this, args);
+      if (this.parent) {
+        return this.parent._bubbleTrigger.apply(this.parent, args);
       }
     };
 
@@ -4206,22 +4228,39 @@ Controls = (function(_super) {
   };
 
   Controls.prototype.initialize = function() {
+    var events;
     this.$el.html(tmpl());
     this.$title = this.$('.controls-title');
-    this.$audio = this.$('audio');
-    this.audio = this.$audio.get(0);
-    this.$audio.on('ended', this.nextTrack.bind(this));
-    this.listenTo(this.root(), 'current:set', this.setCurrent);
-    this.listenTo(this.root(), 'play', this.play);
-    this.listenTo(this.root(), 'pause', this.pause);
+    this.root().$audio = this.$audio = this.$('audio');
+    this.root().audio = this.audio = this.$audio.get(0);
+    events = ['ended', 'progress', 'timeupdate'];
+    events.forEach((function(_this) {
+      return function(eventName) {
+        return _this.$audio.on(eventName, function(e) {
+          return _this.root().trigger('audio:' + eventName, e);
+        });
+      };
+    })(this));
+    this.listenTo(this.root(), 'tracks:set', this.setCurrent);
+    this.listenTo(this.root(), 'audio:ended', this.nextTrack);
+    this.listenTo(this.root(), 'audio:play', this.play);
+    this.listenTo(this.root(), 'audio:pause', this.pause);
+    this.listenTo(this.root(), 'audio:seek', this.seek);
+    this.listenTo(this.root(), 'audio:timeupdate', this.timeupdate);
     return this.listenTo(this.root(), 'keydown', this.keydown);
   };
 
   Controls.prototype.goTo = function(forcePlay) {
     var isPlaying;
+    this.$title.text(this.currentTrack.get('title'));
     isPlaying = forcePlay || !this.audio.paused;
-    this.$audio.attr('src', this.current.get('src'));
-    this.$title.text(this.current.get('title'));
+    this.$audio.one('canplaythrough', (function(_this) {
+      return function() {
+        console.log(_this.currentTrack.get('currentTime'));
+        return _this.seek(_this.currentTrack.get('currentTime'));
+      };
+    })(this));
+    this.$audio.attr('src', this.currentTrack.get('src'));
     if (isPlaying) {
       return this.audio.play();
     }
@@ -4235,6 +4274,20 @@ Controls = (function(_super) {
     }
   };
 
+  Controls.prototype.setCurrent = function(track, forcePlay) {
+    if (this.currentTrack === track) {
+      return;
+    }
+    this.$el.removeAttr('hidden');
+    this.currentTrack = track;
+    if (this.currentTrack) {
+      this.$currentTrack = track.$el;
+      return this.goTo(forcePlay);
+    } else {
+      return this.audio.src = '';
+    }
+  };
+
   Controls.prototype.play = function() {
     return this.audio.play();
   };
@@ -4243,39 +4296,46 @@ Controls = (function(_super) {
     return this.audio.pause();
   };
 
-  Controls.prototype.setCurrent = function(track, forcePlay) {
-    this.$el.removeAttr('hidden');
-    this.current = track;
-    if (this.current) {
-      this.$current = track.$el;
-      return this.goTo(forcePlay);
-    } else {
-      return this.audio.src = '';
-    }
+  Controls.prototype.seek = function(time) {
+    return this.audio.currentTime = time;
+  };
+
+  Controls.prototype.timeupdate = function() {
+    return this.currentTrack.set('currentTime', this.audio.currentTime);
   };
 
   Controls.prototype.keydown = function(e) {
-    if (e.keyCode === 32 && $(':focus').length === 0) {
+    if (e.keyCode === 32 && $(':focus:not(.track-play)').length === 0) {
       e.preventDefault();
       return this.togglePlay();
+    } else if (e.keyCode === 74) {
+      return this.prevTrack();
+    } else if (e.keyCode === 75) {
+      return this.nextTrack();
     }
   };
 
   Controls.prototype.prevTrack = function(e) {
     var track;
-    track = this.$current.prev().data('track');
-    return this.root().trigger('current:set', track);
+    if (e == null) {
+      e = {};
+    }
+    track = this.$currentTrack.prev().data('track');
+    return this.root().trigger('tracks:set', track);
   };
 
   Controls.prototype.nextTrack = function(e) {
     var track;
-    track = this.$current.next().data('track');
-    return this.root().trigger('current:set', track, e.type === 'ended');
+    if (e == null) {
+      e = {};
+    }
+    track = this.$currentTrack.next().data('track');
+    return this.root().trigger('tracks:set', track, e.type === 'ended');
   };
 
   Controls.prototype.shuffleTracks = function(e) {
     this.root().trigger('playlist:shuffle');
-    return this.$current = this.current.$el;
+    return this.$currentTrack = this.currentTrack.$el;
   };
 
   return Controls;
@@ -4369,7 +4429,7 @@ Form = (function(_super) {
 
   Form.prototype.initialize = function() {
     var url;
-    url = 'https://soundcloud.com/calvein/sets/mixtapes';
+    url = 'https://soundcloud.com/calvein/sets/songs';
     this.$el.html(tmpl({
       url: url
     }));
@@ -4421,11 +4481,13 @@ buf.push("<input" + (jade.attr("value", url, true, false)) + "/>");
 )(params); }
 
 },{"jade/lib/runtime.js":"/home/donnees/workspaces/soundcloud-playlist-shuffle/node_modules/jade/lib/runtime.js"}],"/home/donnees/workspaces/soundcloud-playlist-shuffle/src/app/components/tracks/index.coffee":[function(require,module,exports){
-var Tracks, TracksCollection, View, shuffle, tmpl,
+var Tracks, TracksCollection, View, Waveform, shuffle, tmpl,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
 View = require('bamjs/view');
+
+Waveform = require('../waveform');
 
 shuffle = require('bamjs/underscore').shuffle;
 
@@ -4449,9 +4511,11 @@ Tracks = (function(_super) {
 
   Tracks.prototype.initialize = function() {
     this.tracks = new TracksCollection();
-    this.listenTo(this.root(), 'current:set', this.setCurrent);
+    this.listenTo(this.root(), 'tracks:set', this.setCurrent);
     this.listenTo(this.root(), 'playlist:new', this.showPlaylist);
-    return this.listenTo(this.root(), 'playlist:shuffle', this.shuffleTracks);
+    this.listenTo(this.root(), 'playlist:shuffle', this.shuffleTracks);
+    this.listenTo(this.root(), 'audio:timeupdate', this.audioTimeupdate);
+    return this.listenTo(this.root(), 'audio:progress', this.audioProgress);
   };
 
   Tracks.prototype.showTracks = function(tracks) {
@@ -4466,38 +4530,71 @@ Tracks = (function(_super) {
       $track = $(el);
       track = this.tracks.get($track.data('id'));
       track.$el = $track;
-      _results.push($track.data('track', track));
+      $track.data('track', track);
+      _results.push(track.waveform = new Waveform({
+        el: $('.track-waveform', el),
+        parent: this,
+        model: track
+      }));
     }
     return _results;
   };
 
   Tracks.prototype.setCurrent = function(track) {
-    return track != null ? track.$el.addClass('active').siblings('.active').removeClass('active') : void 0;
+    if (!track || this.currentTrack === track) {
+      return;
+    }
+    this.currentTrack = track;
+    track.$el.addClass('active').siblings('.active').removeClass('active');
+    this.$('.track-play.playing').removeClass('playing');
+    return track.$el.find('.track-play').addClass('playing');
   };
 
   Tracks.prototype.showPlaylist = function(playlist) {
-    this.tracks.add(playlist.tracks);
-    return this.showTracks(this.tracks.models.reverse());
+    this.tracks.add(playlist.tracks, {
+      parse: true
+    });
+    $('body').addClass('loading');
+    return this.listenToOnce(this.tracks, 'parse:done', (function(_this) {
+      return function() {
+        _this.showTracks(_this.tracks.models.reverse());
+        return $('body').removeClass('loading');
+      };
+    })(this));
   };
 
   Tracks.prototype.shuffleTracks = function() {
     return this.showTracks(this.tracks.shuffle());
   };
 
+  Tracks.prototype.audioTimeupdate = function(e) {
+    var time;
+    time = this.root().audio.currentTime * 1e3;
+    return this.currentTrack.waveform.drawPlayed(time);
+  };
+
+  Tracks.prototype.audioProgress = function(e) {
+    var buffered, from, last, to;
+    buffered = this.root().audio.buffered;
+    last = buffered.length - 1;
+    from = buffered.start(last) * 1e3;
+    to = buffered.end(last) * 1e3;
+    return this.currentTrack.waveform.drawBuffered(from, to, last);
+  };
+
   Tracks.prototype.clickTrackPlay = function(e) {
     var $el, $track, track;
-    e.stopPropagation();
     $el = $(e.currentTarget);
     $track = $(e.currentTarget).parents('.track');
-    if ($track.hasClass('active') && this.root().isPlaying) {
-      this.root().trigger('pause');
+    if ($track.hasClass('active') && this.root().isPlaying()) {
+      this.root().trigger('audio:pause');
       return $el.removeClass('playing');
     } else {
       this.$('.track-play').removeClass('playing');
       $el.addClass('playing');
       track = $track.data('track');
-      this.root().trigger('current:set', track);
-      return this.root().trigger('play');
+      this.root().trigger('tracks:set', track);
+      return this.root().trigger('audio:play');
     }
   };
 
@@ -4508,7 +4605,7 @@ Tracks = (function(_super) {
     $track = $(e.currentTarget).parents('.track');
     if ($track.hasClass('active')) {
       track = $track.next().data('track');
-      this.root().trigger('current:set', track);
+      this.root().trigger('tracks:set', track);
     }
     return $track.remove();
   };
@@ -4521,7 +4618,7 @@ module.exports = Tracks;
 
 
 
-},{"../../models/tracks":"/home/donnees/workspaces/soundcloud-playlist-shuffle/src/app/models/tracks.coffee","./index.jade":"/home/donnees/workspaces/soundcloud-playlist-shuffle/src/app/components/tracks/index.jade","bamjs/underscore":"/home/donnees/workspaces/soundcloud-playlist-shuffle/node_modules/bamjs/underscore.js","bamjs/view":"/home/donnees/workspaces/soundcloud-playlist-shuffle/node_modules/bamjs/view.js"}],"/home/donnees/workspaces/soundcloud-playlist-shuffle/src/app/components/tracks/index.jade":[function(require,module,exports){
+},{"../../models/tracks":"/home/donnees/workspaces/soundcloud-playlist-shuffle/src/app/models/tracks.coffee","../waveform":"/home/donnees/workspaces/soundcloud-playlist-shuffle/src/app/components/waveform/index.coffee","./index.jade":"/home/donnees/workspaces/soundcloud-playlist-shuffle/src/app/components/tracks/index.jade","bamjs/underscore":"/home/donnees/workspaces/soundcloud-playlist-shuffle/node_modules/bamjs/underscore.js","bamjs/view":"/home/donnees/workspaces/soundcloud-playlist-shuffle/node_modules/bamjs/view.js"}],"/home/donnees/workspaces/soundcloud-playlist-shuffle/src/app/components/tracks/index.jade":[function(require,module,exports){
 var jade = require('jade/lib/runtime.js');
 module.exports=function(params) { if (params) {params.require = require;} return (
 function template(locals) {
@@ -4549,7 +4646,7 @@ buf.push("<li" + (jade.attr("data-id", track.id, true, false)) + " class=\"track
 buf.push("<figure>");
 
 
-buf.push("<img" + (jade.attr("src", track.getImage(), true, false)) + "/>");
+buf.push("<img" + (jade.attr("src", track.getImage(), true, false)) + " class=\"track-image\"/>");
 
 
 buf.push("<figcaption>");
@@ -4564,16 +4661,22 @@ buf.push("</button>");
 buf.push("<div class=\"track-details\">");
 
 
-buf.push("<span>" + (jade.escape(null == (jade_interp = track.getUsername()) ? "" : jade_interp)));
+buf.push("<a" + (jade.attr("href", track.getUrl('user'), true, false)) + " class=\"track-details-user\">" + (jade.escape(null == (jade_interp = track.getUsername()) ? "" : jade_interp)));
 
 
-buf.push("</span>");
+buf.push("</a>");
 
 
-buf.push("<b>" + (jade.escape(null == (jade_interp = track.get('title')) ? "" : jade_interp)));
+buf.push("<a" + (jade.attr("href", track.getUrl(), true, false)) + " class=\"track-details-title\">" + (jade.escape(null == (jade_interp = track.get('title')) ? "" : jade_interp)));
 
 
-buf.push("</b>");
+buf.push("</a>");
+
+
+buf.push("</div>");
+
+
+buf.push("<div class=\"track-waveform\">");
 
 
 buf.push("</div>");
@@ -4582,13 +4685,35 @@ buf.push("</div>");
 buf.push("</figcaption>");
 
 
-buf.push("<a href=\"#\" class=\"track-delete\">");
+buf.push("<div class=\"track-links\">");
+
+
+if ( track.isDownloadable())
+{
+
+
+buf.push("<a" + (jade.attr("href", track.getDownloadUrl(), true, false)) + " data-link=\"download\" title=\"Download track\">");
+
+
+buf.push("⬇");
+
+
+buf.push("</a>");
+
+
+}
+
+
+buf.push("<a href=\"#\" data-link=\"delete\" title=\"Remove track from queue\">");
 
 
 buf.push("×");
 
 
 buf.push("</a>");
+
+
+buf.push("</div>");
 
 
 buf.push("</figure>");
@@ -4612,7 +4737,7 @@ buf.push("<li" + (jade.attr("data-id", track.id, true, false)) + " class=\"track
 buf.push("<figure>");
 
 
-buf.push("<img" + (jade.attr("src", track.getImage(), true, false)) + "/>");
+buf.push("<img" + (jade.attr("src", track.getImage(), true, false)) + " class=\"track-image\"/>");
 
 
 buf.push("<figcaption>");
@@ -4627,16 +4752,22 @@ buf.push("</button>");
 buf.push("<div class=\"track-details\">");
 
 
-buf.push("<span>" + (jade.escape(null == (jade_interp = track.getUsername()) ? "" : jade_interp)));
+buf.push("<a" + (jade.attr("href", track.getUrl('user'), true, false)) + " class=\"track-details-user\">" + (jade.escape(null == (jade_interp = track.getUsername()) ? "" : jade_interp)));
 
 
-buf.push("</span>");
+buf.push("</a>");
 
 
-buf.push("<b>" + (jade.escape(null == (jade_interp = track.get('title')) ? "" : jade_interp)));
+buf.push("<a" + (jade.attr("href", track.getUrl(), true, false)) + " class=\"track-details-title\">" + (jade.escape(null == (jade_interp = track.get('title')) ? "" : jade_interp)));
 
 
-buf.push("</b>");
+buf.push("</a>");
+
+
+buf.push("</div>");
+
+
+buf.push("<div class=\"track-waveform\">");
 
 
 buf.push("</div>");
@@ -4645,13 +4776,35 @@ buf.push("</div>");
 buf.push("</figcaption>");
 
 
-buf.push("<a href=\"#\" class=\"track-delete\">");
+buf.push("<div class=\"track-links\">");
+
+
+if ( track.isDownloadable())
+{
+
+
+buf.push("<a" + (jade.attr("href", track.getDownloadUrl(), true, false)) + " data-link=\"download\" title=\"Download track\">");
+
+
+buf.push("⬇");
+
+
+buf.push("</a>");
+
+
+}
+
+
+buf.push("<a href=\"#\" data-link=\"delete\" title=\"Remove track from queue\">");
 
 
 buf.push("×");
 
 
 buf.push("</a>");
+
+
+buf.push("</div>");
 
 
 buf.push("</figure>");
@@ -4668,7 +4821,172 @@ buf.push("</li>");
 
 }.call(this,"tracks" in locals_for_with?locals_for_with.tracks:typeof tracks!=="undefined"?tracks:undefined,"undefined" in locals_for_with?locals_for_with.undefined:typeof undefined!=="undefined"?undefined:undefined));;return buf.join("");
 } catch (err) {
-  jade.rethrow(err, jade_debug[0].filename, jade_debug[0].lineno, "for track in tracks\n    li(data-id=track.id).track: figure\n        img(src=track.getImage())\n        figcaption\n            button.track-play\n            .track-details\n                span= track.getUsername()\n                b= track.get('title')\n        a(href='#').track-delete ×\n");
+  jade.rethrow(err, jade_debug[0].filename, jade_debug[0].lineno, "for track in tracks\n    li(data-id=track.id).track: figure\n        img(src=track.getImage()).track-image\n        figcaption\n            button.track-play\n            .track-details\n                a(href=track.getUrl('user')).track-details-user= track.getUsername()\n                a(href=track.getUrl()).track-details-title= track.get('title')\n            .track-waveform\n        .track-links\n            if track.isDownloadable()\n                a(\n                    href=track.getDownloadUrl()\n                    data-link='download'\n                    title='Download track'\n                ) ⬇\n            a(\n                href='#'\n                data-link='delete'\n                title='Remove track from queue'\n            ) ×\n");
+}
+}
+)(params); }
+
+},{"jade/lib/runtime.js":"/home/donnees/workspaces/soundcloud-playlist-shuffle/node_modules/jade/lib/runtime.js"}],"/home/donnees/workspaces/soundcloud-playlist-shuffle/src/app/components/waveform/index.coffee":[function(require,module,exports){
+var View, Waveform, tmpl,
+  __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+View = require('bamjs/view');
+
+tmpl = require('./index.jade');
+
+Waveform = (function(_super) {
+  __extends(Waveform, _super);
+
+  function Waveform() {
+    return Waveform.__super__.constructor.apply(this, arguments);
+  }
+
+  Waveform.prototype.namespace = 'waveform';
+
+  Waveform.prototype.events = {
+    'click': 'click'
+  };
+
+  Waveform.prototype.gradientColor = '#bada55';
+
+  Waveform.prototype.initialize = function(options) {
+    this.$el.html(tmpl({
+      gradientFrom: this.gradientColor,
+      gradientTo: d3.rgb(this.gradientColor).darker(.5).toString()
+    }));
+    this.setupElements();
+    this.setupChart();
+    return this.draw(this.model.get('waveform'));
+  };
+
+  Waveform.prototype.createRect = function(parent, type) {
+    var rect;
+    rect = parent.append('rect').attr('height', '100%').attr('class', 'rect-' + type);
+    if (type === 'background' || type === 'overlay') {
+      rect.attr('width', '100%');
+    }
+    return rect;
+  };
+
+  Waveform.prototype.setupElements = function() {
+    var clipPathId;
+    this.svg = d3.select(this.$el.find('svg').get(0));
+    clipPathId = 'area-' + this.model.id;
+    this.groups = {
+      clipPath: this.svg.append('clipPath').attr('id', clipPathId),
+      rects: this.svg.append('g').attr('class', 'rects').attr('clip-path', "url(#" + clipPathId + ")"),
+      overlay: this.createRect(this.svg, 'overlay')
+    };
+    return this.rects = {
+      background: this.createRect(this.groups.rects, 'background'),
+      buffered: this.groups.rects.append('g').attr('class', 'buffered-rects'),
+      played: this.createRect(this.groups.rects, 'played')
+    };
+  };
+
+  Waveform.prototype.setupChart = function() {
+    var middle;
+    this.height = this.$el.height();
+    middle = this.height / 2;
+    this.trackScale = d3.scale.linear().domain([0, this.model.get('duration')]).range([0, 100]);
+    this.x = d3.scale.linear();
+    this.y = d3.scale.linear().range([0, this.height / 2]);
+    return this.area = d3.svg.area().x((function(_this) {
+      return function(d, i) {
+        return _this.x(i);
+      };
+    })(this)).y0((function(_this) {
+      return function(d, i) {
+        return _this.y(1 - d);
+      };
+    })(this)).y1((function(_this) {
+      return function(d, i) {
+        return _this.y(1 + d);
+      };
+    })(this));
+  };
+
+  Waveform.prototype.resize = function() {
+    this.width = this.$el.width();
+    return this.x.range([0, this.width]);
+  };
+
+  Waveform.prototype.draw = function(data) {
+    this.resize();
+    this.x.domain([0, data.length - 1]);
+    return this.groups.clipPath.append('path').datum(data).attr('d', this.area);
+  };
+
+  Waveform.prototype.drawPlayed = function(time) {
+    return this.rects.played.attr('width', this.trackScale(time) + '%');
+  };
+
+  Waveform.prototype.drawBuffered = function(from, to, last) {
+    if (!this.buffered || last > this.buffered.attr('data-i')) {
+      this.buffered = this.createRect(this.rects.buffered, 'buffered');
+    }
+    return this.buffered.attr('data-i', last).attr('x', this.trackScale(from) + '%').attr('width', this.trackScale(to) + '%');
+  };
+
+  Waveform.prototype.click = function(e) {
+    this.root().$audio.one('canplaythrough', (function(_this) {
+      return function() {
+        var time;
+        time = _this.trackScale.invert(e.offsetX / _this.width) / 10;
+        _this.root().trigger('audio:seek', time);
+        return _this.root().trigger('audio:play');
+      };
+    })(this));
+    return this.root().trigger('tracks:set', this.model);
+  };
+
+  return Waveform;
+
+})(View);
+
+module.exports = Waveform;
+
+
+
+},{"./index.jade":"/home/donnees/workspaces/soundcloud-playlist-shuffle/src/app/components/waveform/index.jade","bamjs/view":"/home/donnees/workspaces/soundcloud-playlist-shuffle/node_modules/bamjs/view.js"}],"/home/donnees/workspaces/soundcloud-playlist-shuffle/src/app/components/waveform/index.jade":[function(require,module,exports){
+var jade = require('jade/lib/runtime.js');
+module.exports=function(params) { if (params) {params.require = require;} return (
+function template(locals) {
+var jade_debug = [{ lineno: 1, filename: "/home/donnees/workspaces/soundcloud-playlist-shuffle/src/app/components/waveform/index.jade" }];
+try {
+var buf = [];
+var jade_mixins = {};
+var jade_interp;
+;var locals_for_with = (locals || {});(function (undefined, gradientFrom, gradientTo) {
+
+
+buf.push("<svg width=\"100%\" height=\"100%\">");
+
+
+buf.push("<linearGradient id=\"gradient\" x2=\"0%\" y2=\"100%\">");
+
+
+buf.push("<stop offset=\"0%\"" + (jade.attr("style", 'stop-color:' + gradientFrom, true, false)) + ">");
+
+
+buf.push("</stop>");
+
+
+buf.push("<stop offset=\"100%\"" + (jade.attr("style", 'stop-color:' + gradientTo, true, false)) + ">");
+
+
+buf.push("</stop>");
+
+
+buf.push("</linearGradient>");
+
+
+buf.push("</svg>");
+
+}.call(this,"undefined" in locals_for_with?locals_for_with.undefined:typeof undefined!=="undefined"?undefined:undefined,"gradientFrom" in locals_for_with?locals_for_with.gradientFrom:typeof gradientFrom!=="undefined"?gradientFrom:undefined,"gradientTo" in locals_for_with?locals_for_with.gradientTo:typeof gradientTo!=="undefined"?gradientTo:undefined));;return buf.join("");
+} catch (err) {
+  jade.rethrow(err, jade_debug[0].filename, jade_debug[0].lineno, "svg(width='100%', height='100%')\n    linearGradient(id='gradient', x2='0%', y2='100%')\n        stop(offset='0%',   style='stop-color:' + gradientFrom)\n        stop(offset='100%', style='stop-color:' + gradientTo)\n");
 }
 }
 )(params); }
@@ -4732,11 +5050,13 @@ module.exports = App;
 
 
 },{"./components/controls":"/home/donnees/workspaces/soundcloud-playlist-shuffle/src/app/components/controls/index.coffee","./components/form":"/home/donnees/workspaces/soundcloud-playlist-shuffle/src/app/components/form/index.coffee","./components/tracks":"/home/donnees/workspaces/soundcloud-playlist-shuffle/src/app/components/tracks/index.coffee","bamjs/view":"/home/donnees/workspaces/soundcloud-playlist-shuffle/node_modules/bamjs/view.js"}],"/home/donnees/workspaces/soundcloud-playlist-shuffle/src/app/models/track.coffee":[function(require,module,exports){
-var Model, Track,
+var Model, Track, api,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
 Model = require('bamjs/model');
+
+api = require('../modules/api');
 
 Track = (function(_super) {
   __extends(Track, _super);
@@ -4744,6 +5064,12 @@ Track = (function(_super) {
   function Track() {
     return Track.__super__.constructor.apply(this, arguments);
   }
+
+  Track.prototype.idAttribute = 'id';
+
+  Track.prototype.defaults = {
+    currentTime: 0
+  };
 
   Track.prototype.getImage = function() {
     var url;
@@ -4754,8 +5080,28 @@ Track = (function(_super) {
     return url;
   };
 
+  Track.prototype.getUrl = function(type) {
+    if (type == null) {
+      type = 'track';
+    }
+    switch (type) {
+      case 'track':
+        return this.get('permalink_url');
+      case 'user':
+        return this.get('user').permalink_url;
+    }
+  };
+
   Track.prototype.getUsername = function() {
     return this.get('user').username;
+  };
+
+  Track.prototype.isDownloadable = function() {
+    return this.get('downloadable');
+  };
+
+  Track.prototype.getDownloadUrl = function() {
+    return api.getTrackDownloadUrl(this);
   };
 
   return Track;
@@ -4766,7 +5112,7 @@ module.exports = Track;
 
 
 
-},{"bamjs/model":"/home/donnees/workspaces/soundcloud-playlist-shuffle/node_modules/bamjs/model.js"}],"/home/donnees/workspaces/soundcloud-playlist-shuffle/src/app/models/tracks.coffee":[function(require,module,exports){
+},{"../modules/api":"/home/donnees/workspaces/soundcloud-playlist-shuffle/src/app/modules/api/index.coffee","bamjs/model":"/home/donnees/workspaces/soundcloud-playlist-shuffle/node_modules/bamjs/model.js"}],"/home/donnees/workspaces/soundcloud-playlist-shuffle/src/app/models/tracks.coffee":[function(require,module,exports){
 var Collection, Track, Tracks,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -4783,6 +5129,28 @@ Tracks = (function(_super) {
   }
 
   Tracks.prototype.model = Track;
+
+  Tracks.prototype.parse = function(data) {
+    var done;
+    done = 0;
+    data.forEach((function(_this) {
+      return function(d) {
+        return $.ajax({
+          url: 'http://www.waveformjs.org/w',
+          dataType: 'jsonp',
+          data: {
+            url: d.waveform_url
+          }
+        }).done(function(waveform) {
+          _this.get(d.id).attributes.waveform = waveform;
+          if (++done === data.length) {
+            return _this.trigger('parse:done');
+          }
+        });
+      };
+    })(this));
+    return data;
+  };
 
   return Tracks;
 
@@ -4814,6 +5182,13 @@ Api = (function() {
         return track.src = track.stream_url + '?client_id=' + CLIENT_ID;
       });
     });
+  };
+
+  Api.prototype.getTrackDownloadUrl = function(track) {
+    var url;
+    url = track.get('download_url');
+    url += '?client_id=' + CLIENT_ID;
+    return url;
   };
 
   return Api;

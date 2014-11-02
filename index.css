@@ -11,11 +11,21 @@ figure {
   margin: 0;
 }
 /* Style */
+html,
+body {
+  height: 100%;
+}
 body {
   max-width: 1200px;
   width: 80%;
   margin: 0 auto;
+  background: #fafafa;
   font-family: sans-serif;
+  color: #333;
+}
+body.loading,
+body.loading * {
+  cursor: wait !important;
 }
 @media (max-width: 800px) {
   body {
@@ -73,12 +83,11 @@ input {
 .track.active {
   font-style: italic;
 }
-.track img,
-.track figcaption {
-  display: inline-block;
-  vertical-align: top;
+.track.active .rect-overlay {
+  fill-opacity: 0;
 }
-.track img {
+.track-image {
+  position: absolute;
   width: 100px;
   height: 100px;
   margin-right: 4px;
@@ -86,10 +95,8 @@ input {
   border-radius: 4px;
   box-shadow: 0 0 4px rgba(0,0,0,0.2);
 }
-.track span {
-  display: block;
-  color: #999;
-  font-size: 14px;
+.track figcaption {
+  padding-left: 105px;
 }
 .track-play,
 .track-details {
@@ -110,11 +117,50 @@ input {
 .track-play.playing:before {
   content: '||';
 }
-.track-delete {
+.track-details-user {
+  display: block;
+  color: #999;
+  font-size: 14px;
+}
+.track-details-title {
+  font-weight: bold;
+  color: #333;
+}
+.track-details a {
+  text-decoration: none;
+}
+.track-details a:hover {
+  text-decoration: underline;
+}
+.track-links {
   position: absolute;
   top: 0;
   right: 0;
-  font-size: 24px;
-  color: #000;
+}
+.track-links a {
+  color: #333;
   text-decoration: none;
+  font-size: 24px;
+}
+.track-waveform {
+  height: 60px;
+  cursor: pointer;
+}
+.track-waveform path {
+  fill: #ddd;
+  fill: #000;
+}
+.track-waveform .rect-background {
+  fill: #ddd;
+}
+.track-waveform .rect-buffered {
+  fill: #aaa;
+}
+.track-waveform .rect-played {
+  fill: url("#gradient");
+}
+.track-waveform .rect-overlay {
+  fill: #fff;
+  fill-opacity: 0.5;
+  transition: 0.4s;
 }
