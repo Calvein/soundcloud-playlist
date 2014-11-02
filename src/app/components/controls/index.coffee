@@ -45,7 +45,6 @@ class Controls extends View
         # `audio.paused` is true when you change the src
         isPlaying = forcePlay or !@audio.paused
         @$audio.one('canplaythrough', =>
-            console.log @currentTrack.get('currentTime')
             @seek(@currentTrack.get('currentTime'))
         )
         @$audio.attr('src', @currentTrack.get('src'))
