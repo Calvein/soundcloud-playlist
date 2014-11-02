@@ -4,6 +4,8 @@ api = require('../modules/api')
 
 class Track extends Model
 
+    idAttribute: 'id'
+
     getImage: ->
         url = @get('artwork_url')
         unless url

@@ -5,18 +5,21 @@
     &.active
         font-style italic
 
-    img
-    figcaption
-        display inline-block
-        vertical-align top
+        .rect-overlay
+            fill-opacity 0
 
-    img
+    // .track-image
+    &-image
+        position absolute
         width 100px
         height @width
         margin-right 4px
         border 1px solid #ccc
         border-radius 4px
         box-shadow 0 0 4px rgba(black, .2)
+
+    figcaption
+        padding-left 105px
 
     // .track-play
     &-play
@@ -66,3 +69,26 @@
             color text-color
             text-decoration none
             font-size 24px
+
+    // .track-waveform
+    &-waveform
+        height 60px
+        cursor pointer
+
+        path
+            fill #ddd
+            fill black
+
+        .rect-background
+            fill #ddd
+
+        .rect-buffered
+            fill #aaa
+
+        .rect-played
+            fill url(#gradient)
+
+        .rect-overlay
+            fill #fff
+            fill-opacity .5
+            transition .4s

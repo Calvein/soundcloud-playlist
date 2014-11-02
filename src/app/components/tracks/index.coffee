@@ -1,4 +1,5 @@
 View = require('bamjs/view')
+Waveform = require('../waveform')
 { shuffle } = require('bamjs/underscore')
 
 TracksCollection = require('../../models/tracks')
@@ -17,28 +18,36 @@ class Tracks extends View
         @tracks = new TracksCollection()
 
         # Listeners #
-        @listenTo(@root(), 'current:set', @setCurrent)
+        @listenTo(@root(), 'tracks:set', @setCurrent)
         @listenTo(@root(), 'playlist:new', @showPlaylist)
         @listenTo(@root(), 'playlist:shuffle', @shuffleTracks)
+        @listenTo(@root(), 'audio:timeupdate', @audioTimeupdate)
+        @listenTo(@root(), 'audio:progress', @audioProgress)
 
     showTracks: (tracks) ->
-        console.log tracks
         @$el.html(tmpl(
             tracks: tracks
         ))
 
-        # Add the element to the track and vice-versa
         for el in @$('.track')
+            # Add the element to the track and vice-versa
             $track = $(el)
             track = @tracks.get($track.data('id'))
 
             track.$el = $track
             $track.data('track', track)
 
+            # Add waveform
+            track.waveform = new Waveform(
+                el: $('.track-waveform', el)
+                parent: @
+                model: track
+            )
 
     # Listeners #
     setCurrent: (track) ->
-        return unless track
+        return if not track or @currentTrack is track
+        @currentTrack = track
         track.$el.addClass('active')
             .siblings('.active').removeClass('active')
 
@@ -46,12 +55,30 @@ class Tracks extends View
         track.$el.find('.track-play').addClass('playing')
 
     showPlaylist: (playlist) ->
-        @tracks.add(playlist.tracks)
-        # Show the last added first
-        @showTracks(@tracks.models.reverse())
+        @tracks.add(playlist.tracks,
+            parse: true
+        )
+
+        $('body').addClass('loading')
+        @listenToOnce(@tracks, 'parse:done', =>
+            # Show the last added first
+            @showTracks(@tracks.models.reverse())
+            $('body').removeClass('loading')
+        )
 
     shuffleTracks: ->
         @showTracks(@tracks.shuffle())
+
+    audioTimeupdate: (e) ->
+        time = @root().audio.currentTime * 1e3
+        @currentTrack.waveform.drawPlayed(time)
+
+    audioProgress: (e) ->
+        buffered = @root().audio.buffered
+        last = buffered.length - 1
+        from = buffered.start(last) * 1e3
+        to = buffered.end(last) * 1e3
+        @currentTrack.waveform.drawBuffered(from, to, last)
 
 
     # Events #
@@ -60,15 +87,15 @@ class Tracks extends View
         $el = $(e.currentTarget)
         $track = $(e.currentTarget).parents('.track')
         if $track.hasClass('active') and @root().isPlaying
-            @root().trigger('pause')
+            @root().trigger('audio:pause')
             $el.removeClass('playing')
         else
             # Swap icons
             @$('.track-play').removeClass('playing')
             $el.addClass('playing')
             track = $track.data('track')
-            @root().trigger('current:set', track)
-            @root().trigger('play')
+            @root().trigger('tracks:set', track)
+            @root().trigger('audio:play')
 
     clickTrackDelete: (e) ->
         e.preventDefault()
@@ -79,7 +106,7 @@ class Tracks extends View
         # If the current track is deleted, play the next one
         if $track.hasClass('active')
             track = $track.next().data('track')
-            @root().trigger('current:set', track)
+            @root().trigger('tracks:set', track)
 
         $track.remove()
 

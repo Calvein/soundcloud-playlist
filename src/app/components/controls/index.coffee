@@ -16,23 +16,34 @@ class Controls extends View
 
         # Init resusable elements
         @$title = @$('.controls-title')
-        @$audio = @$('audio')
-        @audio = @$audio.get(0)
+        @root().$audio = @$audio = @$('audio')
+        @root().audio =  @audio  = @$audio.get(0)
 
-        # Add non DOM events
-        @$audio.on('ended', @nextTrack.bind(@))
+        # Trigger useful audio events
+        events = [
+            'ended'
+            'progress'
+            'timeupdate'
+        ]
+        events.forEach((eventName) =>
+            @$audio.on(eventName, (e) =>
+                @root().trigger('audio:' + eventName, e)
+            )
+        )
 
         # Listeners #
-        @listenTo(@root(), 'current:set', @setCurrent)
-        @listenTo(@root(), 'play', @play)
-        @listenTo(@root(), 'pause', @pause)
+        @listenTo(@root(), 'tracks:set', @setCurrent)
+        @listenTo(@root(), 'audio:ended', @nextTrack)
+        @listenTo(@root(), 'audio:play', @play)
+        @listenTo(@root(), 'audio:pause', @pause)
+        @listenTo(@root(), 'audio:seek', @seek)
         @listenTo(@root(), 'keydown', @keydown)
 
     goTo: (forcePlay) ->
         # `audio.paused` is true when you change the src
         isPlaying = forcePlay or !@audio.paused
-        @$audio.attr('src', @current.get('src'))
-        @$title.text(@current.get('title'))
+        @$audio.attr('src', @currentTrack.get('src'))
+        @$title.text(@currentTrack.get('title'))
         if isPlaying
             @audio.play()
 
@@ -45,12 +56,15 @@ class Controls extends View
 
     pause: -> @audio.pause()
 
-    setCurrent: (track, forcePlay) ->
-        @$el.removeAttr('hidden')
-        @current = track
+    seek: (time) -> @audio.currentTime = time
 
-        if @current
-            @$current = track.$el
+    setCurrent: (track, forcePlay) ->
+        return if @currentTrack is track
+        @$el.removeAttr('hidden')
+        @currentTrack = track
+
+        if @currentTrack
+            @$currentTrack = track.$el
             @goTo(forcePlay)
         else
             # Remove and pause
@@ -66,18 +80,18 @@ class Controls extends View
 
     # Events #
     prevTrack: (e) ->
-        track = @$current.prev().data('track')
-        @root().trigger('current:set', track)
+        track = @$currentTrack.prev().data('track')
+        @root().trigger('tracks:set', track)
 
     nextTrack: (e) ->
-        track = @$current.next().data('track')
-        @root().trigger('current:set', track, e.type is 'ended')
+        track = @$currentTrack.next().data('track')
+        @root().trigger('tracks:set', track, e.type is 'ended')
 
     shuffleTracks: (e) ->
         @root().trigger('playlist:shuffle')
 
         # Because we have to redraw the DOM
-        @$current = @current.$el
+        @$currentTrack = @currentTrack.$el
 
 
 module.exports = Controls
