@@ -83,10 +83,9 @@ class Tracks extends View
 
     # Events #
     clickTrackPlay: (e) ->
-        e.stopPropagation()
         $el = $(e.currentTarget)
         $track = $(e.currentTarget).parents('.track')
-        if $track.hasClass('active') and @root().isPlaying
+        if $track.hasClass('active') and @root().isPlaying()
             @root().trigger('audio:pause')
             $el.removeClass('playing')
         else
