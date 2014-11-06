@@ -12,7 +12,6 @@ class Tracks extends Collection
         # Add the waveform data to each track
         done = 0
         data.forEach((d) =>
-            console.time 'parse'
             if @parseType is 'ajax'
                 dfd = $.ajax(
                     url: 'http://www.waveformjs.org/w'

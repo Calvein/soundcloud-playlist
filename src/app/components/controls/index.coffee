@@ -59,7 +59,7 @@ class Controls extends View
     setCurrent: (track, forcePlay) ->
         return if @currentTrack is track
         @$el.removeAttr('hidden')
-        @currentTrack = track
+        @root().currentTrack = @currentTrack = track
 
         if @currentTrack
             @$currentTrack = track.$el

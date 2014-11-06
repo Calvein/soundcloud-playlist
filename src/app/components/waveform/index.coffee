@@ -8,14 +8,11 @@ class Waveform extends View
 
     events:
         'click': 'click'
-
-    gradientColor: '#bada55'
+        'mousemove': 'mousemove'
+        'mouseleave': 'mouseleave'
 
     initialize: (options) ->
-        @$el.html(tmpl(
-            gradientFrom: @gradientColor
-            gradientTo: d3.rgb(@gradientColor).darker(.5).toString()
-        ))
+        @$el.html(tmpl())
 
         @setupElements()
         @setupChart()
@@ -40,7 +37,7 @@ class Waveform extends View
         @groups =
             # The area is in a clippath
             clipPath: @svg.append('clipPath').attr('id', clipPathId)
-            # Then we have 4 <rect>s
+            # Then we have 5 <rect>s
             rects: @svg.append('g')
                 .attr('class', 'rects')
                 .attr('clip-path', "url(##{clipPathId})")
@@ -54,16 +51,21 @@ class Waveform extends View
             buffered: @groups.rects.append('g').attr('class', 'buffered-rects')
             # Played
             played: @createRect(@groups.rects, 'played')
+            # Hovered
+            hovered: @createRect(@groups.rects, 'hovered')
 
     setupChart: ->
         # The width is variable
         @height = @$el.height()
         middle = @height / 2
 
+        @currentTime = 0
         @trackScale = d3.scale.linear()
             .domain([0, @model.get('duration')])
             .range([0, 100])
+        # The data comes from the waveform and it's an array of 1800 values
         @x = d3.scale.linear()
+            .domain([0, 1800])
         # Simple waveform from an area
         @y = d3.scale.linear()
             .range([0, @height / 2])
@@ -80,13 +82,13 @@ class Waveform extends View
 
     draw: (data) ->
         @resize()
-        @x.domain([0, data.length - 1])
 
         @groups.clipPath.append('path')
             .datum(data)
             .attr('d', @area)
 
     drawPlayed: (time) ->
+        @currentTime = time
         @rects.played.attr('width', @trackScale(time) + '%')
 
     drawBuffered: (from, to, last) ->
@@ -98,16 +100,40 @@ class Waveform extends View
             .attr('x',   @trackScale(from) + '%')
             .attr('width', @trackScale(to) + '%')
 
+    goTo: (x) ->
+        time = @trackScale.invert(x / @width) / 10
+        @root().trigger('audio:seek', time)
+        @root().trigger('audio:play')
+
 
     # Events #
     click: (e) ->
-        @root().$audio.one('canplaythrough', =>
-            time = @trackScale.invert(e.offsetX / @width) / 10
-            @root().trigger('audio:seek', time)
-            @root().trigger('audio:play')
-        )
+        if @root().currentTrack is @model and @root().audio.readyState is 4
+            @goTo(e.offsetX)
+        else
+            @root().trigger('tracks:set', @model)
+            @root().$audio.one('canplaythrough', =>
+                @goTo(e.offsetX)
+            )
 
-        @root().trigger('tracks:set', @model)
+    mousemove: (e) ->
+        hoverPct = e.offsetX / @width * 100
+        playedPct = @trackScale(@currentTime)
+
+        if hoverPct > playedPct
+            x = playedPct
+            pct = hoverPct - playedPct
+
+        else
+            pct = playedPct - hoverPct
+            x = playedPct - pct
+
+        @rects.hovered
+            .attr('x', x + '%')
+            .attr('width', pct + '%')
+
+    mouseleave: (e) ->
+        @rects.hovered.attr('width', 0)
 
 
 module.exports = Waveform
