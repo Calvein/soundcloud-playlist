@@ -4222,6 +4222,7 @@ Controls = (function(_super) {
   Controls.prototype.namespace = 'controls';
 
   Controls.prototype.events = {
+    'click .controls-title': 'clickTitle',
     'click [data-direction=prev]': 'prevTrack',
     'click [data-direction=next]': 'nextTrack',
     'click [data-type=shuffle]': 'shuffleTracks'
@@ -4277,7 +4278,6 @@ Controls = (function(_super) {
     if (this.currentTrack === track) {
       return;
     }
-    this.$el.removeAttr('hidden');
     this.root().currentTrack = this.currentTrack = track;
     if (this.currentTrack) {
       this.$currentTrack = track.$el;
@@ -4312,6 +4312,15 @@ Controls = (function(_super) {
     } else if (e.keyCode === 75) {
       return this.nextTrack();
     }
+  };
+
+  Controls.prototype.clickTitle = function(e) {
+    var $track;
+    e.preventDefault();
+    $track = this.root().$("[data-track='" + this.currentTrack.id + "']");
+    return $('html').animate({
+      scrollTop: $track.offset().top - 10
+    }, 300);
   };
 
   Controls.prototype.prevTrack = function(e) {
@@ -4372,10 +4381,10 @@ buf.push("<<");
 buf.push("</button>");
 
 
-buf.push("<b class=\"controls-title\">");
+buf.push("<a href=\"#\" class=\"controls-title\">");
 
 
-buf.push("</b>");
+buf.push("</a>");
 
 
 buf.push("<button data-direction=\"next\">");
@@ -4397,7 +4406,7 @@ buf.push("</button>");
 
 }.call(this,"undefined" in locals_for_with?locals_for_with.undefined:typeof undefined!=="undefined"?undefined:undefined));;return buf.join("");
 } catch (err) {
-  jade.rethrow(err, jade_debug[0].filename, jade_debug[0].lineno, "audio(controls)\nbutton(data-direction='prev') <<\nb.controls-title\nbutton(data-direction='next') >>\nbutton(data-type='shuffle') ⤭");
+  jade.rethrow(err, jade_debug[0].filename, jade_debug[0].lineno, "audio(controls)\nbutton(data-direction='prev') <<\na.controls-title(href='#')\nbutton(data-direction='next') >>\nbutton(data-type='shuffle') ⤭");
 }
 }
 )(params); }
@@ -4529,7 +4538,7 @@ Tracks = (function(_super) {
     for (_i = 0, _len = _ref.length; _i < _len; _i++) {
       el = _ref[_i];
       $track = $(el);
-      track = this.tracks.get($track.data('id'));
+      track = this.tracks.get($track.data('track'));
       track.$el = $track;
       $track.data('track', track);
       _results.push(track.waveform = new Waveform({
@@ -4637,7 +4646,7 @@ var jade_interp;
 
 
 
-buf.push("<li" + (jade.attr("data-id", track.id, true, false)) + " class=\"track\">");
+buf.push("<li" + (jade.attr("data-track", track.id, true, false)) + " class=\"track\">");
 
 
 buf.push("<figure>");
@@ -4728,7 +4737,7 @@ buf.push("</li>");
 
 
 
-buf.push("<li" + (jade.attr("data-id", track.id, true, false)) + " class=\"track\">");
+buf.push("<li" + (jade.attr("data-track", track.id, true, false)) + " class=\"track\">");
 
 
 buf.push("<figure>");
@@ -4818,7 +4827,7 @@ buf.push("</li>");
 
 }.call(this,"tracks" in locals_for_with?locals_for_with.tracks:typeof tracks!=="undefined"?tracks:undefined,"undefined" in locals_for_with?locals_for_with.undefined:typeof undefined!=="undefined"?undefined:undefined));;return buf.join("");
 } catch (err) {
-  jade.rethrow(err, jade_debug[0].filename, jade_debug[0].lineno, "for track in tracks\n    li(data-id=track.id).track: figure\n        img(src=track.getImage()).track-image\n        figcaption\n            button.track-play\n            .track-details\n                a(href=track.getUrl('user')).track-details-user= track.getUsername()\n                a(href=track.getUrl()).track-details-title= track.get('title')\n            .track-waveform\n        .track-links\n            if track.isDownloadable()\n                a(\n                    href=track.getDownloadUrl()\n                    data-link='download'\n                    title='Download track'\n                ) ⬇\n            a(\n                href='#'\n                data-link='delete'\n                title='Remove track from queue'\n            ) ×\n");
+  jade.rethrow(err, jade_debug[0].filename, jade_debug[0].lineno, "for track in tracks\n    li(data-track=track.id).track: figure\n        img(src=track.getImage()).track-image\n        figcaption\n            button.track-play\n            .track-details\n                a(href=track.getUrl('user')).track-details-user= track.getUsername()\n                a(href=track.getUrl()).track-details-title= track.get('title')\n            .track-waveform\n        .track-links\n            if track.isDownloadable()\n                a(\n                    href=track.getDownloadUrl()\n                    data-link='download'\n                    title='Download track'\n                ) ⬇\n            a(\n                href='#'\n                data-link='delete'\n                title='Remove track from queue'\n            ) ×\n");
 }
 }
 )(params); }
@@ -5120,23 +5129,28 @@ Track = (function(_super) {
   Track.prototype.parseType = 'ajax';
 
   Track.prototype.getWaveform = function() {
-    var dfd;
-    if (this.parseType === 'ajax') {
-      dfd = $.ajax({
-        url: 'http://www.waveformjs.org/w',
-        dataType: 'jsonp',
-        data: {
-          url: this.get('waveform_url')
-        }
-      });
-    } else if (this.parseType === 'canvas') {
-      dfd = waveformData(this.get('waveform_url'));
+    var dfd, waveform;
+    waveform = this.get('waveform');
+    if (waveform) {
+      dfd = $.Deferred().resolve(waveform);
+    } else {
+      if (this.parseType === 'ajax') {
+        dfd = $.ajax({
+          url: 'http://www.waveformjs.org/w',
+          dataType: 'jsonp',
+          data: {
+            url: this.get('waveform_url')
+          }
+        });
+      } else if (this.parseType === 'canvas') {
+        dfd = waveformData(this.get('waveform_url'));
+      }
+      dfd.done((function(_this) {
+        return function(waveform) {
+          return _this.set('waveform', waveform);
+        };
+      })(this));
     }
-    dfd.done((function(_this) {
-      return function(waveform) {
-        return _this.set('waveform', waveform);
-      };
-    })(this));
     return dfd;
   };
 
