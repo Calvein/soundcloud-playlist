@@ -7,6 +7,7 @@ class Controls extends View
     namespace: 'controls'
 
     events:
+        'click .controls-title': 'clickTitle'
         'click [data-direction=prev]': 'prevTrack'
         'click [data-direction=next]': 'nextTrack'
         'click [data-type=shuffle]': 'shuffleTracks'
@@ -58,7 +59,6 @@ class Controls extends View
     # Listeners #
     setCurrent: (track, forcePlay) ->
         return if @currentTrack is track
-        @$el.removeAttr('hidden')
         @root().currentTrack = @currentTrack = track
 
         if @currentTrack
@@ -91,6 +91,13 @@ class Controls extends View
 
 
     # Events #
+    clickTitle: (e) ->
+        e.preventDefault()
+        $track = @root().$("[data-track='#{@currentTrack.id}']")
+        $('html').animate(
+            scrollTop: $track.offset().top - 10
+        300)
+
     prevTrack: (e = {}) ->
         track = @$currentTrack.prev().data('track')
         @root().trigger('tracks:set', track)

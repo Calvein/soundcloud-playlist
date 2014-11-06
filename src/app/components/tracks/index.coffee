@@ -32,7 +32,7 @@ class Tracks extends View
         for el in @$('.track')
             # Add the element to the track and vice-versa
             $track = $(el)
-            track = @tracks.get($track.data('id'))
+            track = @tracks.get($track.data('track'))
 
             track.$el = $track
             $track.data('track', track)
