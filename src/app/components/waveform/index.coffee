@@ -12,12 +12,12 @@ class Waveform extends View
         'mouseleave': 'mouseleave'
 
     initialize: (options) ->
+        @undelegateEvents()
         @$el.html(tmpl())
 
         @setupElements()
         @setupChart()
 
-        @undelegateEvents()
         @model.getWaveform().done((waveform) =>
             @draw(waveform)
             @delegateEvents()

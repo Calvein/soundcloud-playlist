@@ -12,7 +12,7 @@ class Tracks extends View
 
     events:
         'click .track-play': 'clickTrackPlay'
-        'click .track-delete': 'clickTrackDelete'
+        'click [data-link=delete]': 'clickTrackDelete'
 
     initialize: ->
         @tracks = new TracksCollection()
@@ -55,11 +55,11 @@ class Tracks extends View
         track.$el.find('.track-play').addClass('playing')
 
     showPlaylist: (playlist) ->
-        @tracks.add(playlist.tracks,
+        @tracks.add(playlist.tracks.reverse(),
             parse: true
         )
 
-        @showTracks(@tracks.models.reverse())
+        @showTracks(@tracks.models)
 
     shuffleTracks: ->
         @showTracks(@tracks.shuffle())
@@ -96,12 +96,14 @@ class Tracks extends View
         e.stopPropagation()
 
         $track = $(e.currentTarget).parents('.track')
+        track = $track.data('track')
 
         # If the current track is deleted, play the next one
         if $track.hasClass('active')
-            track = $track.next().data('track')
-            @root().trigger('tracks:set', track)
+            nextTrack = $track.next().data('track')
+            @root().trigger('tracks:set', nextTrack)
 
         $track.remove()
+        @tracks.remove(track)
 
 module.exports = Tracks
