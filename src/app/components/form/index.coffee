@@ -21,8 +21,10 @@ class Form extends View
         @listenTo(@root(), 'playlist:get', @submit)
 
     getPlaylist: (url) ->
+        $('body').addClass('loading')
         api.getPlaylist(url).done((playlist) =>
             @root().trigger('playlist:new', playlist)
+            $('body').removeClass('loading')
         )
 
 

@@ -1,5 +1,6 @@
 Model = require('bamjs/model')
 api = require('../modules/api')
+waveformData = require('../modules/waveform-data')
 
 
 class Track extends Model
@@ -24,6 +25,25 @@ class Track extends Model
     isDownloadable: -> @get('downloadable')
 
     getDownloadUrl: -> api.getTrackDownloadUrl(@)
+
+    parseType: 'ajax'
+    # parseType: 'canvas'
+    getWaveform: ->
+        # Add the waveform data to each track
+        if @parseType is 'ajax'
+            dfd = $.ajax(
+                url: 'http://www.waveformjs.org/w'
+                dataType: 'jsonp'
+                data: url: @get('waveform_url')
+            )
+        else if @parseType is 'canvas'
+            dfd = waveformData(@get('waveform_url'))
+
+        dfd.done((waveform) =>
+            @set('waveform', waveform)
+        )
+
+        return dfd
 
 
 module.exports = Track

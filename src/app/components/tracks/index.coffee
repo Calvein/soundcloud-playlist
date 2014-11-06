@@ -59,12 +59,7 @@ class Tracks extends View
             parse: true
         )
 
-        $('body').addClass('loading')
-        @listenToOnce(@tracks, 'parse:done', =>
-            # Show the last added first
-            @showTracks(@tracks.models.reverse())
-            $('body').removeClass('loading')
-        )
+        @showTracks(@tracks.models.reverse())
 
     shuffleTracks: ->
         @showTracks(@tracks.shuffle())

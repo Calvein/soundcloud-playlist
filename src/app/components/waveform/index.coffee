@@ -17,7 +17,11 @@ class Waveform extends View
         @setupElements()
         @setupChart()
 
-        @draw(@model.get('waveform'))
+        @undelegateEvents()
+        @model.getWaveform().done((waveform) =>
+            @draw(waveform)
+            @delegateEvents()
+        )
 
     createRect: (parent, type) ->
         rect = parent.append('rect')
