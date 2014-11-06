@@ -19,6 +19,7 @@ body {
   max-width: 1200px;
   width: 80%;
   margin: 0 auto;
+  overflow-y: scroll;
   background: #fafafa;
   font-family: sans-serif;
   color: #333;
@@ -156,8 +157,15 @@ input {
 .track-waveform .rect-buffered {
   fill: #aaa;
 }
+.track-waveform .rect-hovered {
+  fill: #cfe588;
+  transition: 0.3s;
+}
+.track-waveform .rect-hovered.hidden {
+  opacity: 0;
+}
 .track-waveform .rect-played {
-  fill: url("#gradient");
+  fill: #bada55;
 }
 .track-waveform .rect-overlay {
   fill: #fff;

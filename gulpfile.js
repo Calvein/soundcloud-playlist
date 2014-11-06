@@ -96,7 +96,7 @@ var triggerLr = function (type) {
     if (type === 'all') query = '?files=index.html'
     if (type === 'css') query = '?files=index.css'
 
-    http.get('http://127.0.0.1:35729/changed' + query)
+    http.get('http://127.0.0.1:' + portLr + '/changed' + query)
 }
 
 /* Tasks functions */
