@@ -26,9 +26,6 @@ class App extends View
             parent: @
         )
 
-        # Get default playlist
-        @trigger('playlist:get')
-
     isPlaying: -> !@controls.audio.paused
 
     # Events #

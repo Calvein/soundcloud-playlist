@@ -55,8 +55,6 @@ class Tracks extends View
         track.$el.find('.track-play').addClass('playing')
 
     showPlaylist: (playlist) ->
-        # @tracks.add(playlist.tracks,
-        playlist.tracks = [playlist.tracks[0], playlist.tracks[1]]
         @tracks.add(playlist.tracks,
             parse: true
         )

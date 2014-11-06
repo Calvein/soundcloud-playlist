@@ -27,6 +27,8 @@ class Waveform extends View
         # Some are already full
         if type in ['background', 'overlay']
             rect.attr('width', '100%')
+        else if type is 'hovered'
+            rect.classed('hidden', true)
 
         return rect
 
@@ -129,11 +131,12 @@ class Waveform extends View
             x = playedPct - pct
 
         @rects.hovered
+            .classed('hidden', false)
             .attr('x', x + '%')
             .attr('width', pct + '%')
 
     mouseleave: (e) ->
-        @rects.hovered.attr('width', 0)
+        @rects.hovered.classed('hidden', true)
 
 
 module.exports = Waveform
