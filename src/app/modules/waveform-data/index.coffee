@@ -29,7 +29,7 @@ module.exports = (src) ->
 
         dfd.resolve(data)
     )
-    # To test
+    # To test because the waveform from SOundcloud aren't cors friendly
     # img.crossOrigin = 'anonymous'
     # img.src = 'http://i.imgur.com/1xweuKj.png'
     img.src = 'https://w1.sndcdn.com/G5d1wBmLJ2Kw_m.png'

@@ -11,15 +11,15 @@ class Form extends View
         'submit': 'submit'
 
     initialize: ->
-        # TODO get in localstorage
-        url = 'https://soundcloud.com/calvein/'
+        url = localStorage.getItem('url')
+        unless url
+            url = 'https://soundcloud.com/calvein/sets/mixtapes'
         @$el.html(tmpl(
             url: url
         ))
 
         # Listeners #
         @listenTo(@root(), 'playlist:get', @submit)
-        @submit()
 
     getPlaylist: (url) ->
         api.getPlaylist(url).done((playlist) =>
@@ -46,7 +46,7 @@ class Form extends View
             return @getPlaylist(url)
 
         # If only the user is set, we fetch the playlists
-        unless set
+        unless set or set isnt 'sets'
             url += '/sets'
 
         return @getPlaylists(url)
@@ -56,6 +56,7 @@ class Form extends View
     submit: (e) ->
         e?.preventDefault()
         url = @$('input').val()
+        localStorage.setItem('url', url)
         @getData(url)
 
 
