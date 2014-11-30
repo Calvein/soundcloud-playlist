@@ -21,6 +21,7 @@ class Tracks extends View
         @listenTo(@root(), 'tracks:set', @setCurrent)
         @listenTo(@root(), 'playlist:new', @showPlaylist)
         @listenTo(@root(), 'playlist:shuffle', @shuffleTracks)
+        @listenTo(@root(), 'playlist:filter', @filterTracks)
         @listenTo(@root(), 'audio:timeupdate', @audioTimeupdate)
         @listenTo(@root(), 'audio:progress', @audioProgress)
 
@@ -63,6 +64,14 @@ class Tracks extends View
 
     shuffleTracks: ->
         @showTracks(@tracks.shuffle())
+
+    filterTracks: (filter) ->
+        reg = new RegExp(filter, 'i')
+        for track in @tracks.models
+            hasName  = reg.test(track.getUsername())
+            hasTitle = reg.test(track.get('title'))
+
+            track.$el.toggleClass('hidden', !(hasName or hasTitle))
 
     audioTimeupdate: (e) ->
         time = @root().audio.currentTime * 1e3

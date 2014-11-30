@@ -1,11 +1,11 @@
 View = require('bamjs/view')
-api = require('../../modules/api')
+api = require('../../../modules/api')
 
 tmpl = require('./index.jade')
 
 
-class Form extends View
-    namespace: 'form'
+class PlaylistForm extends View
+    namespace: 'playlist-form'
 
     events:
         'submit': 'submit'
@@ -20,6 +20,7 @@ class Form extends View
 
         # Listeners #
         @listenTo(@root(), 'playlist:get', @submit)
+        @submit()
 
     getPlaylist: (url) ->
         api.getPlaylist(url).done((playlist) =>
@@ -60,4 +61,4 @@ class Form extends View
         @getData(url)
 
 
-module.exports = Form
+module.exports = PlaylistForm

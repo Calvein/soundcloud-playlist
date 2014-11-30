@@ -77,6 +77,7 @@ class Controls extends View
     timeupdate: -> @currentTrack.set('currentTime', @audio.currentTime)
 
     keydown: (e) ->
+        return if $('input:focus')
         # space: toggle play/pause
         # Not when focus, except when on a play/pause button
         if e.keyCode is 32 and $(':focus:not(.track-play)').length is 0
@@ -99,11 +100,15 @@ class Controls extends View
         300)
 
     prevTrack: (e = {}) ->
-        track = @$currentTrack.prev().data('track')
+        track = @$currentTrack
+            .prevUntil(':not(.hidden)').last().prev()
+            .data('track')
         @root().trigger('tracks:set', track)
 
     nextTrack: (e = {}) ->
-        track = @$currentTrack.next().data('track')
+        track = @$currentTrack
+            .nextUntil(':not(.hidden)').last().next()
+            .data('track')
         @root().trigger('tracks:set', track, e.type is 'ended')
 
     shuffleTracks: (e) ->

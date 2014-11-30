@@ -36,11 +36,19 @@ body.loading * {
 }
 input {
   display: block;
-  width: 100%;
   padding: 5px;
+  margin: 5px 0;
   border: 1px solid #ccc;
   border-radius: 4px;
   font-size: 22px;
+}
+.playlists-form input {
+  width: 100%;
+}
+.filter-form input {
+  width: 50%;
+  margin-left: auto;
+  margin-right: auto;
 }
 .controls {
   position: fixed;
@@ -83,12 +91,16 @@ input {
   position: relative;
   display: block;
   margin: 10px 0;
+  transition: 0.2s;
 }
 .track.active {
   font-style: italic;
 }
 .track.active .rect-overlay {
   fill-opacity: 0;
+}
+.track.hidden {
+  display: none;
 }
 .track-image {
   position: absolute;

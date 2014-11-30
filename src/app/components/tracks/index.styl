@@ -2,11 +2,14 @@
     position relative
     display block
     margin 10px 0
+    transition .2s
     &.active
         font-style italic
 
         .rect-overlay
             fill-opacity 0
+    &.hidden
+        display none
 
     // .track-image
     &-image

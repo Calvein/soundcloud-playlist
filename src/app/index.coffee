@@ -1,5 +1,5 @@
 View = require('bamjs/view')
-Form = require('./components/form')
+Forms = require('./components/forms')
 Controls = require('./components/controls')
 Tracks = require('./components/tracks')
 
@@ -11,8 +11,8 @@ class App extends View
 
     initialize: ->
         # Init components
-        @form = new Form(
-            el: @$('form')
+        @forms = new Forms(
+            el: @$('.forms')
             parent: @
         )
 
@@ -21,7 +21,7 @@ class App extends View
             parent: @
         )
 
-        @track = new Tracks(
+        @tracks = new Tracks(
             el: @$('.tracks')
             parent: @
         )

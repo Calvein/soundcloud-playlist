@@ -4304,6 +4304,9 @@ Controls = (function(_super) {
   };
 
   Controls.prototype.keydown = function(e) {
+    if ($('input:focus')) {
+      return;
+    }
     if (e.keyCode === 32 && $(':focus:not(.track-play)').length === 0) {
       e.preventDefault();
       return this.togglePlay();
@@ -4328,7 +4331,7 @@ Controls = (function(_super) {
     if (e == null) {
       e = {};
     }
-    track = this.$currentTrack.prev().data('track');
+    track = this.$currentTrack.prevUntil(':not(.hidden)').last().prev().data('track');
     return this.root().trigger('tracks:set', track);
   };
 
@@ -4337,7 +4340,7 @@ Controls = (function(_super) {
     if (e == null) {
       e = {};
     }
-    track = this.$currentTrack.next().data('track');
+    track = this.$currentTrack.nextUntil(':not(.hidden)').last().next().data('track');
     return this.root().trigger('tracks:set', track, e.type === 'ended');
   };
 
@@ -4411,69 +4414,243 @@ buf.push("</button>");
 }
 )(params); }
 
-},{"jade/lib/runtime.js":"/home/donnees/workspaces/soundcloud-playlist-shuffle/node_modules/jade/lib/runtime.js"}],"/home/donnees/workspaces/soundcloud-playlist-shuffle/src/app/components/form/index.coffee":[function(require,module,exports){
-var Form, View, api, tmpl,
+},{"jade/lib/runtime.js":"/home/donnees/workspaces/soundcloud-playlist-shuffle/node_modules/jade/lib/runtime.js"}],"/home/donnees/workspaces/soundcloud-playlist-shuffle/src/app/components/forms/filter/index.coffee":[function(require,module,exports){
+var FilterForm, View, tmpl,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
 View = require('bamjs/view');
 
-api = require('../../modules/api');
-
 tmpl = require('./index.jade');
 
-Form = (function(_super) {
-  __extends(Form, _super);
+FilterForm = (function(_super) {
+  __extends(FilterForm, _super);
 
-  function Form() {
-    return Form.__super__.constructor.apply(this, arguments);
+  function FilterForm() {
+    return FilterForm.__super__.constructor.apply(this, arguments);
   }
 
-  Form.prototype.namespace = 'form';
+  FilterForm.prototype.namespace = 'filter-form';
 
-  Form.prototype.events = {
+  FilterForm.prototype.events = {
+    'input input': 'input',
     'submit': 'submit'
   };
 
-  Form.prototype.initialize = function() {
+  FilterForm.prototype.initialize = function() {
+    return this.$el.html(tmpl());
+  };
+
+  FilterForm.prototype.input = function(e) {
+    var filter;
+    filter = this.$('input').val();
+    return this.root().trigger('playlist:filter', filter);
+  };
+
+  FilterForm.prototype.submit = function(e) {
+    return e.preventDefault();
+  };
+
+  return FilterForm;
+
+})(View);
+
+module.exports = FilterForm;
+
+
+
+},{"./index.jade":"/home/donnees/workspaces/soundcloud-playlist-shuffle/src/app/components/forms/filter/index.jade","bamjs/view":"/home/donnees/workspaces/soundcloud-playlist-shuffle/node_modules/bamjs/view.js"}],"/home/donnees/workspaces/soundcloud-playlist-shuffle/src/app/components/forms/filter/index.jade":[function(require,module,exports){
+var jade = require('jade/lib/runtime.js');
+module.exports=function(params) { if (params) {params.require = require;} return (
+function template(locals) {
+var jade_debug = [{ lineno: 1, filename: "/home/donnees/workspaces/soundcloud-playlist-shuffle/src/app/components/forms/filter/index.jade" }];
+try {
+var buf = [];
+var jade_mixins = {};
+var jade_interp;
+
+
+
+buf.push("<input placeholder=\"Filter tracks\"/>");
+
+;return buf.join("");
+} catch (err) {
+  jade.rethrow(err, jade_debug[0].filename, jade_debug[0].lineno, "input(placeholder='Filter tracks')\n");
+}
+}
+)(params); }
+
+},{"jade/lib/runtime.js":"/home/donnees/workspaces/soundcloud-playlist-shuffle/node_modules/jade/lib/runtime.js"}],"/home/donnees/workspaces/soundcloud-playlist-shuffle/src/app/components/forms/index.coffee":[function(require,module,exports){
+var Filter, Forms, Playlists, View, tmpl,
+  __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+View = require('bamjs/view');
+
+Playlists = require('./playlists');
+
+Filter = require('./filter');
+
+tmpl = require('./index.jade');
+
+Forms = (function(_super) {
+  __extends(Forms, _super);
+
+  function Forms() {
+    return Forms.__super__.constructor.apply(this, arguments);
+  }
+
+  Forms.prototype.namespace = 'forms';
+
+  Forms.prototype.initialize = function() {
+    this.$el.html(tmpl());
+    this.playlistsForm = new Playlists({
+      el: this.$('.playlists-form'),
+      parent: this
+    });
+    return this.filterForm = new Filter({
+      el: this.$('.filter-form'),
+      parent: this
+    });
+  };
+
+  return Forms;
+
+})(View);
+
+module.exports = Forms;
+
+
+
+},{"./filter":"/home/donnees/workspaces/soundcloud-playlist-shuffle/src/app/components/forms/filter/index.coffee","./index.jade":"/home/donnees/workspaces/soundcloud-playlist-shuffle/src/app/components/forms/index.jade","./playlists":"/home/donnees/workspaces/soundcloud-playlist-shuffle/src/app/components/forms/playlists/index.coffee","bamjs/view":"/home/donnees/workspaces/soundcloud-playlist-shuffle/node_modules/bamjs/view.js"}],"/home/donnees/workspaces/soundcloud-playlist-shuffle/src/app/components/forms/index.jade":[function(require,module,exports){
+var jade = require('jade/lib/runtime.js');
+module.exports=function(params) { if (params) {params.require = require;} return (
+function template(locals) {
+var jade_debug = [{ lineno: 1, filename: "/home/donnees/workspaces/soundcloud-playlist-shuffle/src/app/components/forms/index.jade" }];
+try {
+var buf = [];
+var jade_mixins = {};
+var jade_interp;
+;var locals_for_with = (locals || {});(function (undefined) {
+
+
+buf.push("<form class=\"playlists-form\">");
+
+
+buf.push("</form>");
+
+
+buf.push("<form class=\"filter-form\">");
+
+
+buf.push("</form>");
+
+}.call(this,"undefined" in locals_for_with?locals_for_with.undefined:typeof undefined!=="undefined"?undefined:undefined));;return buf.join("");
+} catch (err) {
+  jade.rethrow(err, jade_debug[0].filename, jade_debug[0].lineno, "form.playlists-form\nform.filter-form");
+}
+}
+)(params); }
+
+},{"jade/lib/runtime.js":"/home/donnees/workspaces/soundcloud-playlist-shuffle/node_modules/jade/lib/runtime.js"}],"/home/donnees/workspaces/soundcloud-playlist-shuffle/src/app/components/forms/playlists/index.coffee":[function(require,module,exports){
+var PlaylistForm, View, api, tmpl,
+  __hasProp = {}.hasOwnProperty,
+  __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
+
+View = require('bamjs/view');
+
+api = require('../../../modules/api');
+
+tmpl = require('./index.jade');
+
+PlaylistForm = (function(_super) {
+  __extends(PlaylistForm, _super);
+
+  function PlaylistForm() {
+    return PlaylistForm.__super__.constructor.apply(this, arguments);
+  }
+
+  PlaylistForm.prototype.namespace = 'playlist-form';
+
+  PlaylistForm.prototype.events = {
+    'submit': 'submit'
+  };
+
+  PlaylistForm.prototype.initialize = function() {
     var url;
-    url = 'https://soundcloud.com/calvein/sets/songs';
+    url = localStorage.getItem('url');
+    if (!url) {
+      url = 'https://soundcloud.com/calvein/sets/mixtapes';
+    }
     this.$el.html(tmpl({
       url: url
     }));
-    return this.listenTo(this.root(), 'playlist:get', this.submit);
+    this.listenTo(this.root(), 'playlist:get', this.submit);
+    return this.submit();
   };
 
-  Form.prototype.getPlaylist = function(url) {
-    $('body').addClass('loading');
+  PlaylistForm.prototype.getPlaylist = function(url) {
     return api.getPlaylist(url).done((function(_this) {
       return function(playlist) {
-        _this.root().trigger('playlist:new', playlist);
-        return $('body').removeClass('loading');
+        return _this.root().trigger('playlist:new', playlist);
       };
     })(this));
   };
 
-  Form.prototype.submit = function(e) {
+  PlaylistForm.prototype.getPlaylists = function(url) {
+    return api.getPlaylists(url).done((function(_this) {
+      return function(playlists) {
+        var playlist, _i, _len, _results;
+        _results = [];
+        for (_i = 0, _len = playlists.length; _i < _len; _i++) {
+          playlist = playlists[_i];
+          if (confirm("Add playlist «" + playlist.title + "» ?")) {
+            _results.push(_this.root().trigger('playlist:new', playlist));
+          } else {
+            _results.push(void 0);
+          }
+        }
+        return _results;
+      };
+    })(this));
+  };
+
+  PlaylistForm.prototype.getData = function(url) {
+    var playlist, set, user, _ref;
+    url = url.replace(/\/$/, '');
+    _ref = url.replace(/http(s*):\/\/soundcloud.com\//, '').split('/'), user = _ref[0], set = _ref[1], playlist = _ref[2];
+    if (playlist) {
+      return this.getPlaylist(url);
+    }
+    if (!(set || set !== 'sets')) {
+      url += '/sets';
+    }
+    return this.getPlaylists(url);
+  };
+
+  PlaylistForm.prototype.submit = function(e) {
+    var url;
     if (e != null) {
       e.preventDefault();
     }
-    return this.getPlaylist(this.$('input').val());
+    url = this.$('input').val();
+    localStorage.setItem('url', url);
+    return this.getData(url);
   };
 
-  return Form;
+  return PlaylistForm;
 
 })(View);
 
-module.exports = Form;
+module.exports = PlaylistForm;
 
 
 
-},{"../../modules/api":"/home/donnees/workspaces/soundcloud-playlist-shuffle/src/app/modules/api/index.coffee","./index.jade":"/home/donnees/workspaces/soundcloud-playlist-shuffle/src/app/components/form/index.jade","bamjs/view":"/home/donnees/workspaces/soundcloud-playlist-shuffle/node_modules/bamjs/view.js"}],"/home/donnees/workspaces/soundcloud-playlist-shuffle/src/app/components/form/index.jade":[function(require,module,exports){
+},{"../../../modules/api":"/home/donnees/workspaces/soundcloud-playlist-shuffle/src/app/modules/api/index.coffee","./index.jade":"/home/donnees/workspaces/soundcloud-playlist-shuffle/src/app/components/forms/playlists/index.jade","bamjs/view":"/home/donnees/workspaces/soundcloud-playlist-shuffle/node_modules/bamjs/view.js"}],"/home/donnees/workspaces/soundcloud-playlist-shuffle/src/app/components/forms/playlists/index.jade":[function(require,module,exports){
 var jade = require('jade/lib/runtime.js');
 module.exports=function(params) { if (params) {params.require = require;} return (
 function template(locals) {
-var jade_debug = [{ lineno: 1, filename: "/home/donnees/workspaces/soundcloud-playlist-shuffle/src/app/components/form/index.jade" }];
+var jade_debug = [{ lineno: 1, filename: "/home/donnees/workspaces/soundcloud-playlist-shuffle/src/app/components/forms/playlists/index.jade" }];
 try {
 var buf = [];
 var jade_mixins = {};
@@ -4481,11 +4658,11 @@ var jade_interp;
 ;var locals_for_with = (locals || {});(function (url) {
 
 
-buf.push("<input" + (jade.attr("value", url, true, false)) + "/>");
+buf.push("<input" + (jade.attr("value", url, true, false)) + " placeholder=\"Soundcloud playlist url, e.g: https://soundcloud.com/calvein/sets/mixtapes\"/>");
 
 }.call(this,"url" in locals_for_with?locals_for_with.url:typeof url!=="undefined"?url:undefined));;return buf.join("");
 } catch (err) {
-  jade.rethrow(err, jade_debug[0].filename, jade_debug[0].lineno, "input(value=url)");
+  jade.rethrow(err, jade_debug[0].filename, jade_debug[0].lineno, "input(value=url, placeholder='Soundcloud playlist url, e.g: https://soundcloud.com/calvein/sets/mixtapes')");
 }
 }
 )(params); }
@@ -4524,6 +4701,7 @@ Tracks = (function(_super) {
     this.listenTo(this.root(), 'tracks:set', this.setCurrent);
     this.listenTo(this.root(), 'playlist:new', this.showPlaylist);
     this.listenTo(this.root(), 'playlist:shuffle', this.shuffleTracks);
+    this.listenTo(this.root(), 'playlist:filter', this.filterTracks);
     this.listenTo(this.root(), 'audio:timeupdate', this.audioTimeupdate);
     return this.listenTo(this.root(), 'audio:progress', this.audioProgress);
   };
@@ -4569,6 +4747,20 @@ Tracks = (function(_super) {
 
   Tracks.prototype.shuffleTracks = function() {
     return this.showTracks(this.tracks.shuffle());
+  };
+
+  Tracks.prototype.filterTracks = function(filter) {
+    var hasName, hasTitle, reg, track, _i, _len, _ref, _results;
+    reg = new RegExp(filter, 'i');
+    _ref = this.tracks.models;
+    _results = [];
+    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
+      track = _ref[_i];
+      hasName = reg.test(track.getUsername());
+      hasTitle = reg.test(track.get('title'));
+      _results.push(track.$el.toggleClass('hidden', !(hasName || hasTitle)));
+    }
+    return _results;
   };
 
   Tracks.prototype.audioTimeupdate = function(e) {
@@ -5013,13 +5205,13 @@ buf.push("</svg>");
 )(params); }
 
 },{"jade/lib/runtime.js":"/home/donnees/workspaces/soundcloud-playlist-shuffle/node_modules/jade/lib/runtime.js"}],"/home/donnees/workspaces/soundcloud-playlist-shuffle/src/app/index.coffee":[function(require,module,exports){
-var App, Controls, Form, Tracks, View,
+var App, Controls, Forms, Tracks, View,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
 View = require('bamjs/view');
 
-Form = require('./components/form');
+Forms = require('./components/forms');
 
 Controls = require('./components/controls');
 
@@ -5039,15 +5231,15 @@ App = (function(_super) {
   };
 
   App.prototype.initialize = function() {
-    this.form = new Form({
-      el: this.$('form'),
+    this.forms = new Forms({
+      el: this.$('.forms'),
       parent: this
     });
     this.controls = new Controls({
       el: this.$('.controls'),
       parent: this
     });
-    return this.track = new Tracks({
+    return this.tracks = new Tracks({
       el: this.$('.tracks'),
       parent: this
     });
@@ -5069,7 +5261,7 @@ module.exports = App;
 
 
 
-},{"./components/controls":"/home/donnees/workspaces/soundcloud-playlist-shuffle/src/app/components/controls/index.coffee","./components/form":"/home/donnees/workspaces/soundcloud-playlist-shuffle/src/app/components/form/index.coffee","./components/tracks":"/home/donnees/workspaces/soundcloud-playlist-shuffle/src/app/components/tracks/index.coffee","bamjs/view":"/home/donnees/workspaces/soundcloud-playlist-shuffle/node_modules/bamjs/view.js"}],"/home/donnees/workspaces/soundcloud-playlist-shuffle/src/app/models/track.coffee":[function(require,module,exports){
+},{"./components/controls":"/home/donnees/workspaces/soundcloud-playlist-shuffle/src/app/components/controls/index.coffee","./components/forms":"/home/donnees/workspaces/soundcloud-playlist-shuffle/src/app/components/forms/index.coffee","./components/tracks":"/home/donnees/workspaces/soundcloud-playlist-shuffle/src/app/components/tracks/index.coffee","bamjs/view":"/home/donnees/workspaces/soundcloud-playlist-shuffle/node_modules/bamjs/view.js"}],"/home/donnees/workspaces/soundcloud-playlist-shuffle/src/app/models/track.coffee":[function(require,module,exports){
 var Model, Track, api, waveformData,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -5200,12 +5392,25 @@ Api = (function() {
 
   Api.prototype.contructor = function() {};
 
-  Api.prototype.getPlaylist = function(url) {
+  Api.prototype.getData = function(url, cb) {
     var uri;
-    uri = this.url;
-    uri += '?url=' + url;
+    uri = '?url=' + url;
     uri += '&client_id=' + CLIENT_ID;
-    return $.get(uri).done(function(playlist) {
+    $('body').addClass('loading');
+    return $.get(this.url + uri).done(function(data) {
+      $('body').removeClass('loading');
+      if (cb) {
+        return cb(data);
+      }
+    });
+  };
+
+  Api.prototype.getPlaylists = function(url) {
+    return this.getData(url);
+  };
+
+  Api.prototype.getPlaylist = function(url) {
+    return this.getData(url, function(playlist) {
       return playlist.tracks.forEach(function(track) {
         return track.src = track.stream_url + '?client_id=' + CLIENT_ID;
       });
