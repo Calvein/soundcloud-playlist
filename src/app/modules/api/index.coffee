@@ -7,12 +7,21 @@ class Api
 
     contructor: ->
 
-    getPlaylist: (url) ->
-        uri = @url
-        uri += '?url=' + url
+    getData: (url, cb) ->
+        uri = '?url=' + url
         uri += '&client_id=' + CLIENT_ID
 
-        return $.get(uri).done((playlist) ->
+        $('body').addClass('loading')
+        return $.get(@url + uri).done((data) ->
+            $('body').removeClass('loading')
+            cb(data) if cb
+        )
+
+    getPlaylists: (url) ->
+        return @getData(url)
+
+    getPlaylist: (url) ->
+        return @getData(url, (playlist) ->
             # For conveniency
             playlist.tracks.forEach((track) ->
                 track.src = track.stream_url + '?client_id=' + CLIENT_ID
@@ -25,6 +34,7 @@ class Api
         url += '?client_id=' + CLIENT_ID
 
         return url
+
 
 api = new Api()
 module.exports = api

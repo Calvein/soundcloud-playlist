@@ -12,27 +12,51 @@ class Form extends View
 
     initialize: ->
         # TODO get in localstorage
-        url = 'https://soundcloud.com/calvein/sets/songs'
+        url = 'https://soundcloud.com/calvein/'
         @$el.html(tmpl(
             url: url
         ))
 
         # Listeners #
         @listenTo(@root(), 'playlist:get', @submit)
+        @submit()
 
     getPlaylist: (url) ->
-        $('body').addClass('loading')
         api.getPlaylist(url).done((playlist) =>
             @root().trigger('playlist:new', playlist)
-            $('body').removeClass('loading')
         )
+
+    getPlaylists: (url) ->
+        api.getPlaylists(url).done((playlists) =>
+            for playlist in playlists
+                if confirm("Add playlist «#{playlist.title}» ?")
+                    @root().trigger('playlist:new', playlist)
+        )
+
+    getData: (url) ->
+        # Remove end slash
+        url = url.replace(/\/$/, '')
+
+        [user, set, playlist] = url
+            .replace(/http(s*):\/\/soundcloud.com\//, '')
+            .split('/')
+
+        # Get the specified playlist
+        if playlist
+            return @getPlaylist(url)
+
+        # If only the user is set, we fetch the playlists
+        unless set
+            url += '/sets'
+
+        return @getPlaylists(url)
 
 
     # Events #
     submit: (e) ->
         e?.preventDefault()
-        @getPlaylist(@$('input').val())
-
+        url = @$('input').val()
+        @getData(url)
 
 
 module.exports = Form
