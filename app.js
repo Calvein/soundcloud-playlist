@@ -4304,7 +4304,7 @@ Controls = (function(_super) {
   };
 
   Controls.prototype.keydown = function(e) {
-    if ($('input:focus')) {
+    if ($('input:focus').length) {
       return;
     }
     if (e.keyCode === 32 && $(':focus:not(.track-play)').length === 0) {

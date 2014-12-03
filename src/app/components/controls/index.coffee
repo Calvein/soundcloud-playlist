@@ -77,7 +77,7 @@ class Controls extends View
     timeupdate: -> @currentTrack.set('currentTime', @audio.currentTime)
 
     keydown: (e) ->
-        return if $('input:focus')
+        return if $('input:focus').length
         # space: toggle play/pause
         # Not when focus, except when on a play/pause button
         if e.keyCode is 32 and $(':focus:not(.track-play)').length is 0
