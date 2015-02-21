@@ -84,7 +84,7 @@ var templateCompile = function(cb) {
 
 var styleCompile = function(cb) {
     gulp.src(stylusFile)
-        .pipe(stylus())
+        .pipe(stylus({ sourcemap: { inline: true }}))
         .on('error', handleError)
         .pipe(duration('Reloading style'))
         .pipe(gulp.dest('./'))

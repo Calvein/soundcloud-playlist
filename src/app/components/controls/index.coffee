@@ -53,7 +53,10 @@ class Controls extends View
             @audio.play()
 
     togglePlay: ->
-        if @audio.paused then @audio.play() else @audio.pause()
+        if @audio.paused
+            @root().trigger('audio:play')
+        else
+            @root().trigger('audio:pause')
 
 
     # Listeners #
@@ -107,7 +110,7 @@ class Controls extends View
 
     nextTrack: (e = {}) ->
         track = @$currentTrack
-            .nextUntil(':not(.hidden)').last().next()
+            .find('~ .track:not(.hidden)').first()
             .data('track')
         @root().trigger('tracks:set', track, e.type is 'ended')
 

@@ -4268,9 +4268,9 @@ Controls = (function(_super) {
 
   Controls.prototype.togglePlay = function() {
     if (this.audio.paused) {
-      return this.audio.play();
+      return this.root().trigger('audio:play');
     } else {
-      return this.audio.pause();
+      return this.root().trigger('audio:pause');
     }
   };
 
@@ -4340,7 +4340,7 @@ Controls = (function(_super) {
     if (e == null) {
       e = {};
     }
-    track = this.$currentTrack.nextUntil(':not(.hidden)').last().next().data('track');
+    track = this.$currentTrack.find('~ .track:not(.hidden)').first().data('track');
     return this.root().trigger('tracks:set', track, e.type === 'ended');
   };
 
@@ -4703,7 +4703,9 @@ Tracks = (function(_super) {
     this.listenTo(this.root(), 'playlist:shuffle', this.shuffleTracks);
     this.listenTo(this.root(), 'playlist:filter', this.filterTracks);
     this.listenTo(this.root(), 'audio:timeupdate', this.audioTimeupdate);
-    return this.listenTo(this.root(), 'audio:progress', this.audioProgress);
+    this.listenTo(this.root(), 'audio:progress', this.audioProgress);
+    this.listenTo(this.root(), 'audio:play', this.play);
+    return this.listenTo(this.root(), 'audio:pause', this.pause);
   };
 
   Tracks.prototype.showTracks = function(tracks) {
@@ -4734,8 +4736,8 @@ Tracks = (function(_super) {
     }
     this.currentTrack = track;
     track.$el.addClass('active').siblings('.active').removeClass('active');
-    this.$('.track-play.playing').removeClass('playing');
-    return track.$el.find('.track-play').addClass('playing');
+    this.$('.playing').removeClass('playing');
+    return track.$el.addClass('playing');
   };
 
   Tracks.prototype.showPlaylist = function(playlist) {
@@ -4778,16 +4780,22 @@ Tracks = (function(_super) {
     return this.currentTrack.waveform.drawBuffered(from, to, last);
   };
 
+  Tracks.prototype.pause = function() {
+    return this.currentTrack.$el.removeClass('playing');
+  };
+
+  Tracks.prototype.play = function() {
+    this.$('.playing').removeClass('playing');
+    return this.currentTrack.$el.addClass('playing');
+  };
+
   Tracks.prototype.clickTrackPlay = function(e) {
     var $el, $track, track;
     $el = $(e.currentTarget);
     $track = $(e.currentTarget).parents('.track');
     if ($track.hasClass('active') && this.root().isPlaying()) {
-      this.root().trigger('audio:pause');
-      return $el.removeClass('playing');
+      return this.root().trigger('audio:pause');
     } else {
-      this.$('.track-play').removeClass('playing');
-      $el.addClass('playing');
       track = $track.data('track');
       this.root().trigger('tracks:set', track);
       return this.root().trigger('audio:play');

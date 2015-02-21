@@ -24,6 +24,8 @@ class Tracks extends View
         @listenTo(@root(), 'playlist:filter', @filterTracks)
         @listenTo(@root(), 'audio:timeupdate', @audioTimeupdate)
         @listenTo(@root(), 'audio:progress', @audioProgress)
+        @listenTo(@root(), 'audio:play', @play)
+        @listenTo(@root(), 'audio:pause', @pause)
 
     showTracks: (tracks) ->
         @$el.html(tmpl(
@@ -52,8 +54,8 @@ class Tracks extends View
         track.$el.addClass('active')
             .siblings('.active').removeClass('active')
 
-        @$('.track-play.playing').removeClass('playing')
-        track.$el.find('.track-play').addClass('playing')
+        @$('.playing').removeClass('playing')
+        track.$el.addClass('playing')
 
     showPlaylist: (playlist) ->
         @tracks.add(playlist.tracks.reverse(),
@@ -84,6 +86,14 @@ class Tracks extends View
         to = buffered.end(last) * 1e3
         @currentTrack.waveform.drawBuffered(from, to, last)
 
+    pause: ->
+        @currentTrack.$el.removeClass('playing')
+
+    play: ->
+        # Swap icons
+        @$('.playing').removeClass('playing')
+        @currentTrack.$el.addClass('playing')
+
 
     # Events #
     clickTrackPlay: (e) ->
@@ -91,11 +101,8 @@ class Tracks extends View
         $track = $(e.currentTarget).parents('.track')
         if $track.hasClass('active') and @root().isPlaying()
             @root().trigger('audio:pause')
-            $el.removeClass('playing')
         else
             # Swap icons
-            @$('.track-play').removeClass('playing')
-            $el.addClass('playing')
             track = $track.data('track')
             @root().trigger('tracks:set', track)
             @root().trigger('audio:play')
