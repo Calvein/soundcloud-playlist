@@ -1,4 +1,5 @@
 View = require('bamjs/view')
+Sortable = require('sortablejs')
 Waveform = require('../waveform')
 { shuffle } = require('bamjs/underscore')
 
@@ -31,6 +32,10 @@ class Tracks extends View
         @$el.html(tmpl(
             tracks: tracks
         ))
+
+        Sortable.create(@el,
+            animation: 150
+        )
 
         for el in @$('.track')
             # Add the element to the track and vice-versa

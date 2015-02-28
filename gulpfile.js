@@ -2,6 +2,7 @@ var gulp = require('gulp')
 var gutil = require('gulp-util')
 var duration = require('gulp-duration')
 var source = require('vinyl-source-stream')
+var streamify = require('gulp-streamify')
 var http = require('http')
 var connect = require('connect')
 var serveStatic = require('serve-static')
@@ -13,6 +14,7 @@ var watchify = require('watchify')
 var browserify = require('browserify')
 var coffeeify = require('coffeeify')
 var jadeify = require('browserify-jade').jade({ pretty: false })
+var uglify = require('gulp-uglify')
 // Template
 var jade = require('gulp-jade')
 // Style
@@ -22,8 +24,8 @@ var stylus = require('gulp-stylus')
 var port = 8080
 var portLr = 35729
 var env = gutil.env.prod ? 'prod' : 'dev'
-var handleError = function(err) {
-    gutil.log(err)
+function handleError(err) {
+    gutil.log(err.message)
     growl('Check your terminal.', { title: 'Gulp error' })
 }
 
@@ -40,7 +42,7 @@ var stylusFiles = [
 /* Compile functions */
 // Watchify bundle
 var bundle = null
-var scriptCompile = function(cb) {
+function scriptCompile(cb) {
     if (!bundle) {
         bundle = watchify(browserify(coffeeFile, {
             extensions: ['.coffee']
@@ -59,15 +61,19 @@ var scriptCompile = function(cb) {
         })
     }
 
-    bundle.bundle()
+    var stream = bundle.bundle()
         .on('error', handleError)
         .pipe(source('app.js'))
         .pipe(duration('Reloading app'))
-        .pipe(gulp.dest('./'))
+
+    if (env !== 'dev')
+        stream = stream.pipe(streamify(uglify()))
+
+    stream.pipe(gulp.dest('./'))
         .on('end', cb || function() {})
 }
 
-var templateCompile = function(cb) {
+function templateCompile(cb) {
     var locals = {
         env: env
     }
@@ -82,7 +88,7 @@ var templateCompile = function(cb) {
         .on('end', cb || function() {})
 }
 
-var styleCompile = function(cb) {
+function styleCompile(cb) {
     gulp.src(stylusFile)
         .pipe(stylus({ sourcemap: { inline: true }}))
         .on('error', handleError)
@@ -91,7 +97,7 @@ var styleCompile = function(cb) {
         .on('end', cb || function() {})
 }
 
-var triggerLr = function (type) {
+function triggerLr(type) {
     var query = ''
     if (type === 'all') query = '?files=index.html'
     if (type === 'css') query = '?files=index.css'
@@ -100,13 +106,20 @@ var triggerLr = function (type) {
 }
 
 /* Tasks functions */
-var build = function() {
-    scriptCompile()
-    templateCompile()
-    styleCompile()
+function build() {
+    scriptCompile(done)
+    templateCompile(done)
+    styleCompile(done)
+
+    var i = 0
+    function done() {
+        if (env !== 'prod') return
+        if (++i < 3) return
+        process.exit()
+    }
 }
 
-var serve = function() {
+function serve() {
     var app = connect()
         .use(serveStatic('./'))
 
@@ -116,7 +129,7 @@ var serve = function() {
         })
 }
 
-var watch = function() {
+function watch() {
     // Watch Jade
     gulp.watch(jadeFile, function() {
         templateCompile(function() {
