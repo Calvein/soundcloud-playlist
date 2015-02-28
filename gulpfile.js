@@ -113,9 +113,12 @@ function build() {
 
     var i = 0
     function done() {
-        if (env !== 'prod') return
         if (++i < 3) return
-        process.exit()
+        if (env === 'prod') {
+            process.exit()
+        } else {
+            gutil.log('Your app is ready')
+        }
     }
 }
 

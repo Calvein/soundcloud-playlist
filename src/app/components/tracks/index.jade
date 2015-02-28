@@ -1,5 +1,5 @@
 for track in tracks
-    li(data-track=track.id).track: figure
+    li(data-track=track.id).track.showing: figure
         img(src=track.getImage()).track-image
         figcaption
             button.track-play

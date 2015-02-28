@@ -37,7 +37,7 @@ class Tracks extends View
         # Store elements
         $tracks = @$('.track')
         setTimeout(->
-            $tracks.addClass('shown')
+            $tracks.removeClass('showing')
         )
 
         # Make the track list sortable

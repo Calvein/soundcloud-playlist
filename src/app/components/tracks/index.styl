@@ -8,19 +8,34 @@
     display block
     height 100px
     margin 10px 0
-    opacity 0
-    transform translate(0, 40px)
+    opacity 1
+    transform translate(0, 0)
     transition .2s
+    // When track is selected
     &.active
         font-style italic
 
         .rect-overlay
             fill-opacity 0
-    &.shown
-        opacity 1
-        transform translate(0, 0)
+    // When track is showing, need to put the default values on the elemnts
+    &.showing
+        opacity 0
+        transform translate(0, 40px)
+
+        .track-image
+            opacity 0
+            transform translate(-20px, 0)
+
+        figcaption
+        .track-links
+            opacity 0
+            transform translate(0, 20px)
+
+
+    // When track is hidden (filtered out)
     &.hidden
         display none
+    // When track is deleted
     &.delete
         // Height transition is wonky :(
         height 0
@@ -35,6 +50,15 @@
     for i in (1..10)
         & + :nth-child(n + {i})
             transition-delay .03s * i
+
+    // .track-image
+    &-image
+    figcaption
+    // .track-links
+    &-links
+        transform scale(1)
+        opacity 1
+        transition .2s .2s
 
     // .track-image
     &-image

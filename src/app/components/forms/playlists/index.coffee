@@ -65,6 +65,7 @@ class PlaylistForm extends View
         @setPlaylist(url)
 
     clickDelete: (e) ->
-        @root().trigger('tracks:reset')
+        if confirm('Do you really want to remove all the tracks ?')
+            @root().trigger('tracks:reset')
 
 module.exports = PlaylistForm
