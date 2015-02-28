@@ -1,5 +1,5 @@
 {
-  "name": "soundcloud-playlist-shuffle",
+  "name": "soundcloud-playlist",
   "version": "0.0.0",
   "description": "",
   "main": "index.js",
@@ -9,14 +9,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/Calvein/soundcloud-playlist-shuffle.git"
+    "url": "https://github.com/Calvein/soundcloud-playlist.git"
   },
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/Calvein/soundcloud-playlist-shuffle/issues"
+    "url": "https://github.com/Calvein/soundcloud-playlist/issues"
   },
-  "homepage": "https://github.com/Calvein/soundcloud-playlist-shuffle",
+  "homepage": "https://github.com/Calvein/soundcloud-playlist",
   "devDependencies": {
     "browserify": "^5.10.1",
     "browserify-jade": "^0.1.1",
