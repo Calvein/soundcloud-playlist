@@ -27,6 +27,7 @@ class Track extends Model
     getDownloadUrl: -> api.getTrackDownloadUrl(@)
 
     parseType: 'ajax'
+    # Canvas would be better but SoundCloud waveform aren't CORS friendly
     # parseType: 'canvas'
     getWaveform: ->
         waveform = @get('waveform')

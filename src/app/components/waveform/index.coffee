@@ -93,6 +93,8 @@ class Waveform extends View
             .datum(data)
             .attr('d', @area)
 
+        @$el.addClass('drawn')
+
     drawPlayed: (time) ->
         @currentTime = time
         @rects.played.attr('width', @trackScale(time) + '%')

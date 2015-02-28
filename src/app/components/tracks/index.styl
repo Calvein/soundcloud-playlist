@@ -1,15 +1,40 @@
+.tracks
+    &.sorting
+        .track
+            transition 0
+
 .track
     position relative
     display block
+    height 100px
     margin 10px 0
+    opacity 0
+    transform translate(0, 40px)
     transition .2s
     &.active
         font-style italic
 
         .rect-overlay
             fill-opacity 0
+    &.shown
+        opacity 1
+        transform translate(0, 0)
     &.hidden
         display none
+    &.delete
+        // Height transition is wonky :(
+        height 0
+        margin 0
+        opacity 0
+        transform translate(-500px) scale(.6)
+        transition-delay 0 !important
+    &.sortable-ghost
+        opacity .6
+
+    // Your screen is too big if you can see more than 10 tracks
+    for i in (1..10)
+        & + :nth-child(n + {i})
+            transition-delay .03s * i
 
     // .track-image
     &-image
@@ -68,15 +93,14 @@
         top 0
         right 0
 
-        a
-            color text-color
-            text-decoration none
-            font-size 24px
-
     // .track-waveform
     &-waveform
         height 60px
         cursor pointer
+        opacity 0
+        transition .2s
+        &.drawn
+            opacity 1
 
         path
             fill #ddd

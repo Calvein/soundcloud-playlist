@@ -20,6 +20,7 @@ class Tracks extends View
 
         # Listeners #
         @listenTo(@root(), 'tracks:set', @setCurrent)
+        @listenTo(@root(), 'tracks:reset', @deleteAllTracks)
         @listenTo(@root(), 'playlist:new', @showPlaylist)
         @listenTo(@root(), 'playlist:shuffle', @shuffleTracks)
         @listenTo(@root(), 'playlist:filter', @filterTracks)
@@ -33,12 +34,24 @@ class Tracks extends View
             tracks: tracks
         ))
 
-        Sortable.create(@el,
-            animation: 150
+        # Store elements
+        $tracks = @$('.track')
+        setTimeout(->
+            $tracks.addClass('shown')
         )
 
-        for el in @$('.track')
-            # Add the element to the track and vice-versa
+        # Make the track list sortable
+        Sortable.create(@el,
+            animation: 200
+            # Toggle .sorting to prevent glitches caused by transitions
+            onStart: (e) =>
+                @$el.addClass('sorting')
+            onEnd: (e) =>
+                @$el.removeClass('sorting')
+        )
+
+        # Add the element to the track and vice-versa
+        for el in $tracks
             $track = $(el)
             track = @tracks.get($track.data('track'))
 
@@ -65,6 +78,7 @@ class Tracks extends View
     showPlaylist: (playlist) ->
         @tracks.add(playlist.tracks.reverse(),
             parse: true
+            at: 0
         )
 
         @showTracks(@tracks.models)
@@ -99,18 +113,37 @@ class Tracks extends View
         @$('.playing').removeClass('playing')
         @currentTrack.$el.addClass('playing')
 
+    playTrack: (track) ->
+        $track = track.$el
+        if $track.hasClass('active') and @root().isPlaying()
+            @root().trigger('audio:pause')
+        else
+            # Swap icons
+            @root().trigger('tracks:set', track)
+            @root().trigger('audio:play')
+
+    deleteTrack: (track) ->
+        $track = track.$el
+        # If the current track is deleted, play the next one
+        if $track.hasClass('active')
+            nextTrack = $track.next().data('track')
+            @root().trigger('tracks:set', nextTrack)
+
+        $track.one('transitionend', =>
+            $track.remove()
+            @tracks.remove(track)
+        ).addClass('delete')
+
+    deleteAllTracks: ->
+        for track in @tracks.models
+            @deleteTrack(track)
 
     # Events #
     clickTrackPlay: (e) ->
         $el = $(e.currentTarget)
         $track = $(e.currentTarget).parents('.track')
-        if $track.hasClass('active') and @root().isPlaying()
-            @root().trigger('audio:pause')
-        else
-            # Swap icons
-            track = $track.data('track')
-            @root().trigger('tracks:set', track)
-            @root().trigger('audio:play')
+        track = $track.data('track')
+        @playTrack(track)
 
     clickTrackDelete: (e) ->
         e.preventDefault()
@@ -118,13 +151,7 @@ class Tracks extends View
 
         $track = $(e.currentTarget).parents('.track')
         track = $track.data('track')
+        @deleteTrack(track)
 
-        # If the current track is deleted, play the next one
-        if $track.hasClass('active')
-            nextTrack = $track.next().data('track')
-            @root().trigger('tracks:set', nextTrack)
-
-        $track.remove()
-        @tracks.remove(track)
 
 module.exports = Tracks

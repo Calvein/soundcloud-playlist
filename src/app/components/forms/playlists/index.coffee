@@ -9,6 +9,7 @@ class PlaylistForm extends View
 
     events:
         'submit': 'submit'
+        'click [data-link=delete]': 'clickDelete'
 
     initialize: ->
         url = localStorage.getItem('url')
@@ -19,8 +20,12 @@ class PlaylistForm extends View
         ))
 
         # Listeners #
-        @listenTo(@root(), 'playlist:get', @submit)
-        @submit()
+        @listenTo(@root(), 'playlist:get', @setPlaylist)
+        @setPlaylist(url)
+
+    setPlaylist: (url) ->
+        localStorage.setItem('url', url)
+        @getData(url)
 
     getPlaylist: (url) ->
         api.getPlaylist(url).done((playlist) =>
@@ -55,10 +60,11 @@ class PlaylistForm extends View
 
     # Events #
     submit: (e) ->
-        e?.preventDefault()
+        e.preventDefault()
         url = @$('input').val()
-        localStorage.setItem('url', url)
-        @getData(url)
+        @setPlaylist(url)
 
+    clickDelete: (e) ->
+        @root().trigger('tracks:reset')
 
 module.exports = PlaylistForm
