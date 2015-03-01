@@ -23,5 +23,4 @@ class FilterForm extends View
         e.preventDefault()
 
 
-
 module.exports = FilterForm

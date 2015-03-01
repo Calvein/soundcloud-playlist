@@ -34,14 +34,14 @@
 
     // When track is hidden (filtered out)
     &.hidden
-        display none
     // When track is deleted
     &.delete
         // Height transition is wonky :(
         height 0
         margin 0
         opacity 0
-        transform translate(-500px) scale(.6)
+        transform translate(-500px) scale(.8)
+        transform-origin 100% 50%
         transition-delay 0 !important
     &.sortable-ghost
         opacity .6
