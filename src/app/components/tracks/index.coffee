@@ -73,7 +73,8 @@ class Tracks extends View
             .siblings('.active').removeClass('active')
 
         @$('.playing').removeClass('playing')
-        track.$el.addClass('playing')
+        unless @root().audio.paused
+            track.$el.addClass('playing')
 
     showPlaylist: (playlist) ->
         @tracks.add(playlist.tracks.reverse(),
@@ -122,10 +123,10 @@ class Tracks extends View
             @root().trigger('tracks:set', track)
             @root().trigger('audio:play')
 
-    deleteTrack: (track) ->
+    deleteTrack: (track, deleteAll) ->
         $track = track.$el
         # If the current track is deleted, play the next one
-        if $track.hasClass('active')
+        if not deleteAll and $track.hasClass('active')
             nextTrack = $track.next().data('track')
             @root().trigger('tracks:set', nextTrack)
 
@@ -136,7 +137,7 @@ class Tracks extends View
 
     deleteAllTracks: ->
         for track in @tracks.models
-            @deleteTrack(track)
+            @deleteTrack(track, true)
 
     # Events #
     clickTrackPlay: (e) ->

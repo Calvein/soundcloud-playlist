@@ -25,7 +25,7 @@ var port = 8080
 var portLr = 35729
 var env = gutil.env.prod ? 'prod' : 'dev'
 function handleError(err) {
-    gutil.log(err.message)
+    gutil.log(err)
     growl('Check your terminal.', { title: 'Gulp error' })
 }
 

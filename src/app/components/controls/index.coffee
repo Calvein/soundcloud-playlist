@@ -44,6 +44,7 @@ class Controls extends View
     goTo: (forcePlay) ->
         @$title.text(@currentTrack.get('title'))
         # `audio.paused` is true when you change the src
+        # So we need to force play when we play the next song
         isPlaying = forcePlay or !@audio.paused
         @$audio.one('canplaythrough', =>
             @seek(@currentTrack.get('currentTime'))
@@ -64,20 +65,53 @@ class Controls extends View
         return if @currentTrack is track
         @root().currentTrack = @currentTrack = track
 
-        if @currentTrack
-            @$currentTrack = track.$el
-            @goTo(forcePlay)
-        else
-            # Remove and pause
+        unless track
+            # It remove and pause
             @audio.src = ''
+            return
+
+        @$currentTrack = track.$el
+
+        # For scrobbling
+        track.set('startPlaying', Date.parse(new Date().toUTCString()))
+        # Duration has to be 30s mininum
+        if track.get('duration') < 3e4
+            @scrobbleIn = Infinity
+        # We need to scrobble at at least 4 minutes played or half the song
+        else
+            @scrobbleIn = Math.min(
+                track.get('duration') / 2 / 1e3
+                4 * 60
+            )
+        @currentTime = null
+        @root().user.nowPlaying(track)
+        @goTo(forcePlay)
 
     play: -> @audio.play()
 
     pause: -> @audio.pause()
 
-    seek: (time) -> @audio.currentTime = time
+    seek: (time) ->
+        @audio.currentTime = time
+        @currentTime = @audio.currentTime
 
-    timeupdate: -> @currentTrack.set('currentTime', @audio.currentTime)
+    timeupdate: ->
+        # Fist time playing
+        if @currentTime is null
+            @currentTime = @audio.currentTime
+        # Change the scrobbled time
+        else
+            @scrobbleIn -= @audio.currentTime - @currentTime
+            @currentTime = @audio.currentTime
+
+        # When the user listen enough of the song (@see setCurrent)
+        # we trigger the scrobbling
+        if @scrobbleIn <= 0
+            # We prevent the song to scrobble again while it's still playing
+            @scrobbleIn = Infinity
+            @root().user.scrobble(@currentTrack)
+
+        @currentTrack.set('currentTime', @audio.currentTime)
 
     keydown: (e) ->
         return if $('input:focus').length

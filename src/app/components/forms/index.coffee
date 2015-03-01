@@ -22,5 +22,4 @@ class Forms extends View
         )
 
 
-
 module.exports = Forms
