@@ -40,6 +40,20 @@ class Track extends Model
                     url: 'http://www.waveformjs.org/w'
                     dataType: 'jsonp'
                     data: url: @get('waveform_url')
+                ).fail(=>
+                    # Create fake waveform to still be able to click on it
+                    # when the service is down
+                    waveLength = 200
+                    scale = d3.scale.linear()
+                        .interpolate(-> d3.ease('sin-in-out'))
+                        .range([0, 1])
+                        .domain([0, waveLength])
+                    waveform = [0...1800].map((i) ->
+                        i %= waveLength
+                        i = if i > waveLength / 2 then waveLength - i else i
+                        return scale(i * 2)
+                    )
+                    dfd.resolve(waveform)
                 )
             else if @parseType is 'canvas'
                 dfd = waveformData(@get('waveform_url'))

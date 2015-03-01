@@ -18,8 +18,8 @@ class Waveform extends View
         @setupElements()
         @setupChart()
 
-        @model.getWaveform().done((waveform) =>
-            @draw(waveform)
+        @model.getWaveform().done(=>
+            @draw(@model.get('waveform'))
             @delegateEvents()
         )
 
