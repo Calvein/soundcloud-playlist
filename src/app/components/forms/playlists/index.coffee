@@ -12,9 +12,7 @@ class PlaylistForm extends View
         'click [data-link=delete]': 'clickDelete'
 
     initialize: ->
-        url = localStorage.getItem('url')
-        unless url
-            url = 'https://soundcloud.com/calvein/sets/mixtapes'
+        url = @root().user.get('url')
         @$el.html(tmpl(
             url: url
         ))
@@ -24,7 +22,7 @@ class PlaylistForm extends View
         @setPlaylist(url)
 
     setPlaylist: (url) ->
-        localStorage.setItem('url', url)
+        @root().user.set('url', url)
         @getData(url)
 
     getPlaylist: (url) ->
