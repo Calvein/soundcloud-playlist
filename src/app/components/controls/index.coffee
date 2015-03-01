@@ -131,21 +131,26 @@ class Controls extends View
     # Events #
     clickTitle: (e) ->
         e.preventDefault()
-        $track = @root().$("[data-track='#{@currentTrack.id}']")
         $('html').animate(
-            scrollTop: $track.offset().top - 10
+            scrollTop: @$currentTrack.offset().top - 10
         300)
 
     prevTrack: (e = {}) ->
-        track = @$currentTrack
-            .prevUntil(':not(.hidden)').last().prev()
-            .data('track')
+        $track = @$currentTrack.prevAll(':not(.hidden)').first()
+        # Go to the last one if no prev track
+        unless $track.get(0)
+            $track = @$currentTrack.nextAll(':not(.hidden)').last()
+
+        track = $track.data('track')
         @root().trigger('tracks:set', track)
 
     nextTrack: (e = {}) ->
-        track = @$currentTrack
-            .find('~ .track:not(.hidden)').first()
-            .data('track')
+        $track = @$currentTrack.nextAll(':not(.hidden)').first()
+        # Go to the first one if no next track
+        unless $track.get(0)
+            $track = @$currentTrack.prevAll(':not(.hidden)').last()
+
+        track = $track.data('track')
         @root().trigger('tracks:set', track, e.type is 'ended')
 
     shuffleTracks: (e) ->

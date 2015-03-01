@@ -68,7 +68,6 @@ class Lastfm extends View
 
     # Listeners #
     nowPlaying: (track) ->
-        console.log @isPrivate
         return if @isPrivate
         params =
             method: 'track.updateNowPlaying'
@@ -114,7 +113,6 @@ class Lastfm extends View
             @openDropdown()
 
     changePrivate: ->
-        console.log @isPrivate
         @isPrivate = !@isPrivate
 
     clickDisconnect: (e) ->
