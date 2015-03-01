@@ -1,5 +1,6 @@
 View = require('bamjs/view')
 User = require('./models/user')
+Lasftfm = require('./components/lastfm')
 Forms = require('./components/forms')
 Controls = require('./components/controls')
 Tracks = require('./components/tracks')
@@ -15,6 +16,12 @@ class App extends View
         @user = new User()
 
         # Init components
+        @lastfm = new Lasftfm(
+            el: @$('.lastfm')
+            model: @user
+            parent: @
+        )
+
         @forms = new Forms(
             el: @$('.forms')
             parent: @

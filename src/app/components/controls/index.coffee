@@ -84,7 +84,7 @@ class Controls extends View
                 4 * 60
             )
         @currentTime = null
-        @root().user.nowPlaying(track)
+        @root().trigger('lastfm:nowPlaying', track)
         @goTo(forcePlay)
 
     play: -> @audio.play()
@@ -109,7 +109,7 @@ class Controls extends View
         if @scrobbleIn <= 0
             # We prevent the song to scrobble again while it's still playing
             @scrobbleIn = Infinity
-            @root().user.scrobble(@currentTrack)
+            @root().trigger('lastfm:scrobble', @currentTrack)
 
         @currentTrack.set('currentTime', @audio.currentTime)
 
