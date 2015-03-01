@@ -1,4 +1,70 @@
 .lastfm
     position absolute
-    top 0
+    top 50px
     right 0
+    font-size 14px
+    line-height 22px
+    padding 5px
+    margin 6px
+
+    [data-dropdown]
+        color text-color
+        &:before
+            content url(http://cdn.last.fm/flatness/favicon.2.ico)
+            display inline-block
+            vertical-align sub
+            margin-right 4px
+
+.dropdown
+    position absolute
+    display inline-block
+    min-width 125px
+    top 30px
+    right 0
+    opacity 0
+    transform translate(0, 10px) scale(.9)
+    pointer-events none
+    transition .2s
+    z-index 1
+    &.open
+        opacity 1
+        transform scale(1)
+        pointer-events auto
+    &:before
+    &:after
+        content ''
+        position absolute
+        left 50%
+        border solid transparent
+    &:before
+        top -5px
+        margin-left -6px
+        border-width 0 6px 6px
+        border-bottom-color text-color
+    &:after
+        top -4px
+        margin-left -5px
+        border-width 0 5px 5px
+        border-bottom-color white
+
+    > *
+        display block
+        padding 3px 10px
+        border solid text-color
+        border-width 0 1px 1px
+        background white
+        text-decoration none
+        color text-color
+        cursor pointer
+
+        input
+            vertical-align middle
+
+    > :first-child
+        border-top-width 1px
+        border-top-left-radius 3px
+        border-top-right-radius 3px
+
+    > :last-child
+        border-bottom-right-radius 3px
+        border-bottom-left-radius 3px

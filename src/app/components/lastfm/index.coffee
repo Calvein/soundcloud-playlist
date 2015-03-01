@@ -1,43 +1,19 @@
 API_KEY = '98b4474b8d6ab99941c1edc1441478cd'
-# There is no backend so fuck it
-API_SECRET = '6531a456239925b5e32792c5a1c6589d'
-BASE_URL = 'http://ws.audioscrobbler.com/2.0/'
 
 View = require('bamjs/view')
-crypto = require('crypto')
 qs = require('querystring')
+{ msToS, getLastFmQuery, createParams } = require('../../modules/lastfm')
 
 tmpl = require('./index.jade')
 
 
-msToS = (ms) -> Math.round(ms / 1e3)
-
-getLastFmQuery = (params) ->
-    params.api_sig = createSignature(params)
-    params.format = 'json'
-    return $.ajax(
-        url: BASE_URL
-        data: params
-        type: 'POST'
-    )
-
-createParams = (params, joint = '', itemJoint = '') ->
-    params = Object.keys(params).sort().map((key) ->
-        return key + itemJoint + params[key]
-    ).join(joint)
-
-createSignature = (params) ->
-    return crypto.createHash('md5')
-        .update(createParams(params) + API_SECRET)
-        .digest('hex')
-
 class Lastfm extends View
     namespace: 'lastfm'
 
-    # events:
-    #     'click': 'click'
-    #     'mousemove': 'mousemove'
-    #     'mouseleave': 'mouseleave'
+    events:
+        'click [data-dropdown]': 'clickDropdown'
+        'change [data-private]': 'changePrivate'
+        'click [data-disconnect]': 'clickDisconnect'
 
     initialize: (options) ->
         # Is connecting to lastfm
@@ -55,6 +31,10 @@ class Lastfm extends View
         @$el.html(tmpl(
             user: @model
         ))
+
+        # Store elements
+        @$dropdownTrigger = @$('[data-dropdown]')
+        @$dropdown = @$('.dropdown')
 
         # Listeners #
         @listenTo(@root(), 'lastfm:nowPlaying', @nowPlaying)
@@ -77,7 +57,7 @@ class Lastfm extends View
         # Create url to connect to last.fm
         params =
             api_key: API_KEY
-            cb: location.origin
+            cb: location.href
         connectUrl = 'http://www.last.fm/api/auth/?'
         connectUrl += createParams(params, '&', '=')
 
@@ -88,6 +68,8 @@ class Lastfm extends View
 
     # Listeners #
     nowPlaying: (track) ->
+        console.log @isPrivate
+        return if @isPrivate
         params =
             method: 'track.updateNowPlaying'
             artist: track.get('user').username
@@ -99,6 +81,7 @@ class Lastfm extends View
         getLastFmQuery(params)
 
     scrobble: (track) ->
+        return if @isPrivate
         params =
             method: 'track.scrobble'
             artist: track.get('user').username
@@ -108,9 +91,36 @@ class Lastfm extends View
             api_key: API_KEY
             sk: @model.get('sk')
 
-        getLastFmQuery(params).done((res) =>
-            console.log res
+        getLastFmQuery(params)
+
+    openDropdown: ->
+        @$dropdown.addClass('open')
+        $(document).on('click.dropdown', (e) =>
+            el = e.target
+            unless el in [@$dropdownTrigger.get(0), @$dropdown.get(0)] or
+                   @$dropdown.get(0).contains(el)
+                @closeDropdown()
         )
+
+    closeDropdown: ->
+        @$dropdown.removeClass('open')
+
+    # Events #
+    clickDropdown: (e) ->
+        e.preventDefault()
+        if @$dropdown.hasClass('open')
+            @closeDropdown()
+        else
+            @openDropdown()
+
+    changePrivate: ->
+        console.log @isPrivate
+        @isPrivate = !@isPrivate
+
+    clickDisconnect: (e) ->
+        e.preventDefault()
+        @model.set('sk', null)
+        @renderNotConnected()
 
 
 module.exports = Lastfm

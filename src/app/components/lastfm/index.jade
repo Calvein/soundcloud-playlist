@@ -1,4 +1,8 @@
 if user
-    span= user.get('name')
+    a(href='#', data-dropdown)= user.get('name')
+    .dropdown
+        label Private mode
+            input(type='checkbox', data-private)
+        a(href='#', data-disconnect) Disconnect
 else
     a(href=connectUrl) Connect to last.fm
