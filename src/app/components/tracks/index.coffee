@@ -63,8 +63,8 @@ class Tracks extends View
             # Add waveform
             track.waveform = new Waveform(
                 el: $('.track-waveform', el)
-                parent: @
                 model: track
+                parent: @
             )
 
     # Listeners #
@@ -142,7 +142,7 @@ class Tracks extends View
             @deleteTrack(track, true)
 
     resize: (e) ->
-        @sortable.option('disabled', window.innerWidth <= 800)
+        @sortable?.option('disabled', window.innerWidth <= 800)
 
 
     # Events #

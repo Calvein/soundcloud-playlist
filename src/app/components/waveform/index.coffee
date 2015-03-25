@@ -23,6 +23,9 @@ class Waveform extends View
             @delegateEvents()
         )
 
+        # Listeners #
+        @listenTo(@root(), 'resize', @resize)
+
     createRect: (parent, type) ->
         rect = parent.append('rect')
             .attr('height', '100%')
@@ -81,13 +84,13 @@ class Waveform extends View
             .y0((d, i) => @y(1 - d))
             .y1((d, i) => @y(1 + d))
 
-    resize: ->
+    resizeWidth: ->
         @width = @$el.width()
 
         @x.range([0, @width])
 
     draw: (data) ->
-        @resize()
+        @resizeWidth()
 
         @groups.clipPath.append('path')
             .datum(data)
@@ -113,6 +116,11 @@ class Waveform extends View
         @root().trigger('audio:seek', time)
         @root().trigger('audio:play')
 
+
+    # Listeners #
+    resize: (e) ->
+        @resizeWidth()
+        @groups.clipPath.select('path').attr('d', @area)
 
     # Events #
     click: (e) ->
