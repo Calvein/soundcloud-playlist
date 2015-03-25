@@ -16,6 +16,7 @@
             margin-right 4px
 
 .dropdown
+    dropdownBorder = #bbb
     position absolute
     display inline-block
     min-width 125px
@@ -40,7 +41,7 @@
         top -5px
         margin-left -6px
         border-width 0 6px 6px
-        border-bottom-color text-color
+        border-bottom-color dropdownBorder
     &:after
         top -4px
         margin-left -5px
@@ -50,15 +51,18 @@
     > *
         display block
         padding 3px 10px
-        border solid text-color
+        border solid dropdownBorder
         border-width 0 1px 1px
         background white
         text-decoration none
         color text-color
         cursor pointer
 
-        input
-            vertical-align middle
+    input
+        position absolute
+        top 9px
+        right 7px
+        margin 0
 
     > :first-child
         border-top-width 1px
