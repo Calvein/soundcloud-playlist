@@ -114,17 +114,18 @@ class Controls extends View
         @currentTrack.set('currentTime', @audio.currentTime)
 
     keydown: (e) ->
+        console.log e.keyCode
         return if $('input:focus').length
         # space: toggle play/pause
         # Not when focus, except when on a play/pause button
         if e.keyCode is 32 and $(':focus:not(.track-play)').length is 0
             e.preventDefault()
             @togglePlay()
-        # J => prev
-        else if e.keyCode is 74
+        # J or ctrl + ← => prev
+        else if e.keyCode is 74 or e.ctrlKey and e.keyCode is 37
             @prevTrack()
-        # K => next
-        else if e.keyCode is 75
+        # K or ctrl + → => next
+        else if e.keyCode is 75 or e.ctrlKey and e.keyCode is 39
             @nextTrack()
 
 
