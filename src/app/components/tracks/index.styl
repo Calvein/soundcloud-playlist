@@ -61,18 +61,17 @@
         opacity 1
         transition .2s .2s
 
+    trackImageSize = 100px
     // .track-image
     &-image
         position absolute
-        width 100px
-        height @width
+        width trackImageSize
         margin-right 4px
         border 1px solid #ccc
-        border-radius 4px
-        box-shadow 0 0 4px rgba(black, .2)
+        box-shadow 0 0 0 1px #eee
 
     figcaption
-        padding-left 105px
+        padding-left trackImageSize + 10
 
     // .track-play
     &-play
@@ -83,8 +82,8 @@
 
     // .track-play
     &-play
-        width  40px
-        height 40px
+        width 40px
+        height @width
         border-radius 50%
         margin-right 10px
         font-size 24px
@@ -96,6 +95,11 @@
 
     // .track-details
     &-details
+        width calc(100% - 80px)
+        white-space nowrap
+        overflow hidden
+        text-overflow ellipsis
+
         // .track-details-user
         &-user
             display block
@@ -150,3 +154,23 @@
             fill #fafafa
             fill-opacity .5
             transition .4s
+
+    @media small
+        trackImageSize = 80px
+        // .track-image
+        &-image
+            width trackImageSize
+            height @width
+
+        figcaption
+            padding-left trackImageSize + 10
+
+        // .track-play
+        &-play
+            width 30px
+            height @width
+            font-size 18px
+
+        // .track-details
+        &-details
+            width calc(100% - 70px)

@@ -114,7 +114,6 @@ class Controls extends View
         @currentTrack.set('currentTime', @audio.currentTime)
 
     keydown: (e) ->
-        console.log e.keyCode
         return if $('input:focus').length
         # space: toggle play/pause
         # Not when focus, except when on a play/pause button
