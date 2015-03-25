@@ -21,12 +21,12 @@ class Controls extends View
         @root().audio =  @audio  = @$audio.get(0)
 
         # Trigger useful audio events
-        events = [
+        audioEvents = [
             'ended'
             'progress'
             'timeupdate'
         ]
-        events.forEach((eventName) =>
+        audioEvents.forEach((eventName) =>
             @$audio.on(eventName, (e) =>
                 @root().trigger('audio:' + eventName, e)
             )
@@ -62,6 +62,8 @@ class Controls extends View
 
     # Listeners #
     setCurrent: (track, forcePlay) ->
+        @$el.removeClass('init')
+
         return if @currentTrack is track
         @root().currentTrack = @currentTrack = track
 
@@ -131,7 +133,7 @@ class Controls extends View
     # Events #
     clickTitle: (e) ->
         e.preventDefault()
-        $('html').animate(
+        $('html, body').animate(
             scrollTop: @$currentTrack.offset().top - 10
         300)
 
