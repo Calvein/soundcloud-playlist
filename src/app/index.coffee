@@ -4,6 +4,7 @@ Lasftfm = require('./components/lastfm')
 Forms = require('./components/forms')
 Controls = require('./components/controls')
 Tracks = require('./components/tracks')
+{ throttle } = require('bamjs/underscore')
 
 class App extends View
     namespace: 'app'
@@ -37,9 +38,15 @@ class App extends View
             parent: @
         )
 
+        resize = throttle(@resize.bind(@), 50)
+        $(window).on('resize', resize)
+
     isPlaying: -> !@controls.audio.paused
 
     # Events #
+    resize: (e) ->
+        @trigger('resize', e)
+
     keydown: (e) ->
         @trigger('keydown', e)
 

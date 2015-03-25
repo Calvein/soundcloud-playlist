@@ -28,6 +28,7 @@ class Tracks extends View
         @listenTo(@root(), 'audio:progress', @audioProgress)
         @listenTo(@root(), 'audio:play', @play)
         @listenTo(@root(), 'audio:pause', @pause)
+        @listenTo(@root(), 'resize', @resize)
 
     showTracks: (tracks) ->
         @$el.html(tmpl(
@@ -41,14 +42,15 @@ class Tracks extends View
         )
 
         # Make the track list sortable
-        Sortable.create(@el,
-            animation: 200
+        @sortable = Sortable.create(@el,
+            animation: 100
             # Toggle .sorting to prevent glitches caused by transitions
             onStart: (e) =>
                 @$el.addClass('sorting')
             onEnd: (e) =>
                 @$el.removeClass('sorting')
         )
+        @resize()
 
         # Add the element to the track and vice-versa
         for el in $tracks
@@ -138,6 +140,10 @@ class Tracks extends View
     deleteAllTracks: ->
         for track in @tracks.models
             @deleteTrack(track, true)
+
+    resize: (e) ->
+        @sortable.option('disabled', window.innerWidth <= 800)
+
 
     # Events #
     clickTrackPlay: (e) ->
