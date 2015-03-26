@@ -33,6 +33,27 @@ body
         width 100%
         padding 0 20px
 
+.github-link
+    position absolute
+    top -10px
+    left @top
+    border solid transparent
+    border-width 0 0 40px 40px
+    border-left-color text-color
+    text-decoration none
+    color white
+    transition .2s
+    &:before
+        content '✎'
+        position absolute
+        top -3px
+        left -41px
+        font-size 24px
+    &:hover
+        top 0
+        left @top
+
+
 [data-link]
     color text-color
     text-decoration none

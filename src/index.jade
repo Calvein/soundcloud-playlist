@@ -8,8 +8,12 @@ html(lang='en')
         if env === 'dev'
             script(src='http://127.0.0.1:35729/livereload.js')
     body
-        .lastfm
+        a.github-link(
+            href='https://github.com/Calvein/soundcloud-playlist/'
+            title='See github project'
+        )
         .forms
+        .lastfm
         .controls.init
         ul.tracks
         - var suffix = 'js'
