@@ -59,6 +59,9 @@ class Controls extends View
         else
             @root().trigger('audio:pause')
 
+    # Can be negative
+    addSeconds: (seconds) -> @audio.currentTime += seconds
+
 
     # Listeners #
     setCurrent: (track, forcePlay) ->
@@ -128,6 +131,12 @@ class Controls extends View
         # K or ctrl + → => next
         else if e.keyCode is 75 or e.ctrlKey and e.keyCode is 39
             @nextTrack()
+        # shift + ← => -5s
+        else if e.shiftKey and e.keyCode is 37
+            @addSeconds(-5)
+        # shift + → => +5s
+        else if e.shiftKey and e.keyCode is 39
+            @addSeconds(5)
 
 
     # Events #
