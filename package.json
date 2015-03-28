@@ -2,7 +2,7 @@
   "name": "soundcloud-playlist",
   "version": "1.0.0",
   "description": "This project was made because soundcloud was lacking a shuffle mode while playing a playlist. Then, it just become what I wanted to quickly listen to my playlist.",
-  "main": "index.js",
+  "main": "index.html",
   "scripts": {
     "start": "gulp",
     "build": "gulp build --prod"
