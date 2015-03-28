@@ -1,7 +1,7 @@
 {
   "name": "soundcloud-playlist",
-  "version": "0.0.0",
-  "description": "",
+  "version": "1.0.0",
+  "description": "This project was made because soundcloud was lacking a shuffle mode while playing a playlist. Then, it just become what I wanted to quickly listen to my playlist.",
   "main": "index.js",
   "scripts": {
     "start": "gulp",
@@ -11,12 +11,16 @@
     "type": "git",
     "url": "https://github.com/Calvein/soundcloud-playlist.git"
   },
-  "author": "",
-  "license": "ISC",
   "bugs": {
     "url": "https://github.com/Calvein/soundcloud-playlist/issues"
   },
+  "keywords": [
+    "soundcloud",
+    "playlist"
+  ],
   "homepage": "https://github.com/Calvein/soundcloud-playlist",
+  "author": "François Robichet <calvein>",
+  "license": "ISC",
   "devDependencies": {
     "browserify": "^5.10.1",
     "browserify-jade": "^0.1.1",
