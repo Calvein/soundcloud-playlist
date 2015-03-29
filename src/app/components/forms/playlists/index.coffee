@@ -35,14 +35,31 @@ class PlaylistForm extends View
     getPlaylist: (url) ->
         api.getPlaylist(url).done((playlist) =>
             @root().trigger('playlist:new', playlist)
+        ).fail((jqXHR, textStatus, errorThrown) =>
+            @showRequestError(jqXHR, textStatus, errorThrown, 'playlist')
         )
 
     getPlaylists: (url) ->
-        api.getPlaylists(url).done((playlists) =>
+        api.getPlaylists(url).then((playlists, textStatus, jqXHR) =>
+            if playlists.length is 0
+                return new $.Deferred()
+                    .reject(null, null, 'No playlists')
+                    .promise()
+
             for playlist in playlists
                 if confirm("Add playlist «#{playlist.title}» ?")
                     @root().trigger('playlist:new', playlist)
+        ).fail((jqXHR, textStatus, errorThrown) =>
+            @showRequestError(jqXHR, textStatus, errorThrown, 'user')
         )
+
+    showRequestError: (jqXHR, textStatus, errorThrown, type) ->
+        alert("Error while getting #{type}: \"#{errorThrown}\"")
+        console.error('Results of the fail request:')
+        console.log('jqXHR', jqXHR)
+        console.log('textStatus', textStatus)
+        console.log('errorThrown', errorThrown)
+
 
     getData: (url) ->
         { user, playlist } = soundcloudUrlData.getData(url)
