@@ -1,5 +1,6 @@
 View = require('bamjs/view')
 api = require('../../../modules/api')
+soundcloudUrlData = require('../../../modules/soundcloud-url-data')
 
 tmpl = require('./index.jade')
 
@@ -12,7 +13,13 @@ class PlaylistForm extends View
         'click [data-link=delete]': 'clickDelete'
 
     initialize: ->
-        url = @root().user.get('url')
+        user = @root().user.getUser()
+        playlist = @root().user.getPlaylist()
+
+        url = user
+        if playlist
+            url += "/#{playlist}"
+
         @$el.html(tmpl(
             url: url
         ))
@@ -22,7 +29,7 @@ class PlaylistForm extends View
         @setPlaylist(url)
 
     setPlaylist: (url) ->
-        @root().user.set('url', url)
+        @root().user.setUrl(url)
         @getData(url)
 
     getPlaylist: (url) ->
@@ -38,21 +45,11 @@ class PlaylistForm extends View
         )
 
     getData: (url) ->
-        # Remove end slash
-        url = url.replace(/\/$/, '')
+        { user, playlist } = soundcloudUrlData.getData(url)
+        url = soundcloudUrlData.getUrl(user, playlist)
 
-        [user, set, playlist] = url
-            .replace(/http(s*):\/\/soundcloud.com\//, '')
-            .split('/')
-
-        # Get the specified playlist
         if playlist
             return @getPlaylist(url)
-
-        # If only the user is set, we fetch the playlists
-        unless set or set isnt 'sets'
-            url += '/sets'
-
         return @getPlaylists(url)
 
 
@@ -65,5 +62,6 @@ class PlaylistForm extends View
     clickDelete: (e) ->
         if confirm('Do you really want to remove all the tracks ?')
             @root().trigger('tracks:reset')
+
 
 module.exports = PlaylistForm
