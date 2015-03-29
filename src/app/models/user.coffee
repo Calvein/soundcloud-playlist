@@ -10,7 +10,7 @@ class User extends Model
         # Get the user/playlist in the url first
         url = location.hash.slice(1)
         if url
-            { user, playlist } = soundcloudUrlData.getData()
+            { user, playlist } = soundcloudUrlData.getData(url)
         # Else, get it from localstorage
         if not user
             user = attrs.user
@@ -36,6 +36,7 @@ class User extends Model
         { user, playlist } = soundcloudUrlData.getData(url)
         @set('user', user)
         @set('playlist', playlist)
+        @save()
 
 
 module.exports = User
