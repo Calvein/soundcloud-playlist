@@ -1,13 +1,42 @@
+audioBg = hsl(0, 0, 60%)
+
+// I'm using Chrome
+audio::-webkit-media-controls
+    align-items flex-start
+
+    // audio::-webkit-media-controls-enclosure
+    &-enclosure
+        max-width 100%
+        text-align left
+
+    // audio::-webkit-media-controls-panel
+    &-panel
+        border-radius 0
+        background audioBg
+
+    // audio::-webkit-media-controls-play-button
+    &-play-button
+    // audio::-webkit-media-controls-timeline
+    &-timeline
+    // audio::-webkit-media-controls-mute-button
+    &-mute-button
+    // audio::-webkit-media-controls-volume-slider
+    &-volume-slider
+        cursor pointer
+
 .controls
     position fixed
-    width 300px
     bottom 0
-    right 10%
-    background white
-    text-align center
+    left 0
+    right 0
+    transform translate(0, 0)
+    padding-bottom 7px
+    border-top 1px solid #666
+    background audioBg
+    transition .2s
     z-index 1
     &.init
-        display none
+        transform translate(0, 100px)
 
     audio
         display block
@@ -16,18 +45,21 @@
     button
         display inline-block
         width 30px
+        margin-right 5px
+        &:first-of-type
+            margin-left 15px
 
     // .controls-title
     &-title
         display inline-block
         vertical-align bottom
-        width 200px
         white-space nowrap
         overflow hidden
         text-overflow ellipsis
         font-weight bold
         text-decoration none
         color text-color
+        color white
 
     @media small
         width 100%
