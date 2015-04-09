@@ -2,7 +2,7 @@ API_KEY = '98b4474b8d6ab99941c1edc1441478cd'
 
 View = require('bamjs/view')
 qs = require('querystring')
-{ msToS, getLastFmQuery, createParams } = require('../../modules/lastfm')
+{ getLastFmQuery, createParams } = require('../../modules/lastfm')
 
 tmpl = require('./index.jade')
 
@@ -71,9 +71,9 @@ class Lastfm extends View
         return if @isPrivate
         params =
             method: 'track.updateNowPlaying'
-            artist: track.get('user').username
-            track: track.get('title')
-            duration: msToS(track.get('duration'))
+            artist: track.getUsername()
+            track: track.getTitle()
+            duration: track.getDuration('s')
             api_key: API_KEY
             sk: @model.get('sk')
 
@@ -83,10 +83,10 @@ class Lastfm extends View
         return if @isPrivate
         params =
             method: 'track.scrobble'
-            artist: track.get('user').username
-            track: track.get('title')
-            timestamp: msToS(track.get('startPlaying'))
-            duration: msToS(track.get('duration'))
+            artist: track.getUsername()
+            track: track.getTitle()
+            timestamp: track.getStartPlaying('s')
+            duration: track.getDuration('s')
             api_key: API_KEY
             sk: @model.get('sk')
 

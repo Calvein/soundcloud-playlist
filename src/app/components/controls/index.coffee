@@ -42,14 +42,14 @@ class Controls extends View
         @listenTo(@root(), 'keydown', @keydown)
 
     goTo: (forcePlay) ->
-        @$title.text(@currentTrack.get('title'))
+        @$title.text(@currentTrack.getTitle())
         # `audio.paused` is true when you change the src
         # So we need to force play when we play the next song
         isPlaying = forcePlay or !@audio.paused
         @$audio.one('canplaythrough', =>
-            @seek(@currentTrack.get('currentTime'))
+            @seek(@currentTrack.getCurrentTime())
         )
-        @$audio.attr('src', @currentTrack.get('src'))
+        @$audio.attr('src', @currentTrack.getSrc())
         if isPlaying
             @audio.play()
 
@@ -80,14 +80,12 @@ class Controls extends View
         # For scrobbling
         track.set('startPlaying', Date.parse(new Date().toUTCString()))
         # Duration has to be 30s mininum
-        if track.get('duration') < 3e4
+        duration = track.getDuration()
+        if duration < 3e4
             @scrobbleIn = Infinity
         # We need to scrobble at at least 4 minutes played or half the song
         else
-            @scrobbleIn = Math.min(
-                track.get('duration') / 2 / 1e3
-                4 * 60
-            )
+            @scrobbleIn = Math.min(duration / 2 / 1e3, 4 * 60)
         @currentTime = null
         @root().trigger('lastfm:nowPlaying', track)
         @goTo(forcePlay)

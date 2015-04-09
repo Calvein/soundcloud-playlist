@@ -2,12 +2,32 @@ Model = require('bamjs/model')
 api = require('../modules/api')
 waveformData = require('../modules/waveform-data')
 
+formatTime = (ms, format) ->
+    s = Math.round(ms / 1e3)
+    switch format
+        when 's' then return s
+        when 'mm:ss'
+            minutes = Math.ceil(s / 60)
+            seconds = s % 60
+            if seconds < 10 then seconds = '0' + seconds
+            return minutes + ':' + seconds
+        else return ms
 
 class Track extends Model
 
     idAttribute: 'id'
     defaults:
         currentTime: 0
+
+    getTitle: -> @get('title')
+
+    getCurrentTime: -> @get('currentTime')
+
+    getSrc: -> @get('src')
+
+    getDuration: (format) -> formatTime(@get('duration'), format)
+
+    getStartPlaying: (format) -> formatTime(@get('startPlaying'), format)
 
     getImage: ->
         url = @get('artwork_url')
@@ -24,7 +44,7 @@ class Track extends Model
 
     isDownloadable: -> @get('downloadable')
 
-    getDownloadUrl: -> api.getTrackDownloadUrl(@)
+    getDownloadUrl: -> api.getTrackDownloadUrl(@get('download_url'))
 
     parseType: 'ajax'
     # Canvas would be better but SoundCloud waveform aren't CORS friendly

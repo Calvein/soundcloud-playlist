@@ -28,12 +28,9 @@ class Api
             )
         )
 
-    getTrackDownloadUrl: (track) ->
-        # We need to add the client_id
-        url = track.get('download_url')
-        url += '?client_id=' + CLIENT_ID
-
-        return url
+    # We need to add the client_id
+    getTrackDownloadUrl: (url) ->
+        return url + '?client_id=' + CLIENT_ID
 
 
 api = new Api()

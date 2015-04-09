@@ -19,7 +19,7 @@ class Waveform extends View
         @setupChart()
 
         @model.getWaveform().done(=>
-            @draw(@model.get('waveform'))
+            @draw(@model.getWaveform())
             @delegateEvents()
         )
 
@@ -70,7 +70,7 @@ class Waveform extends View
 
         @currentTime = 0
         @trackScale = d3.scale.linear()
-            .domain([0, @model.get('duration')])
+            .domain([0, @model.getDuration()])
             .range([0, 100])
         # The data comes from the waveform and it's an array of 1800 values
         @x = d3.scale.linear()

@@ -93,7 +93,7 @@ class Tracks extends View
         reg = new RegExp(filter, 'i')
         for track in @tracks.models
             hasName  = reg.test(track.getUsername())
-            hasTitle = reg.test(track.get('title'))
+            hasTitle = reg.test(track.getTitle())
 
             track.$el.toggleClass('hidden', !(hasName or hasTitle))
 

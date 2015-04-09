@@ -5,8 +5,6 @@ API_SECRET = '6531a456239925b5e32792c5a1c6589d'
 crypto = require('crypto')
 
 
-msToS = (ms) -> Math.round(ms / 1e3)
-
 createParams = (params, joint = '', itemJoint = '') ->
     params = Object.keys(params).sort().map((key) ->
         return key + itemJoint + params[key]
@@ -27,7 +25,6 @@ getLastFmQuery = (params) ->
     )
 
 module.exports =
-    msToS: msToS
     createParams: createParams
     createSignature: createSignature
     getLastFmQuery: getLastFmQuery

@@ -116,12 +116,6 @@
             &:hover
                 text-decoration underline
 
-    // .track-links
-    &-links
-        position absolute
-        top 0
-        right 0
-
     // .track-waveform
     &-waveform
         height 60px
@@ -133,7 +127,6 @@
 
         path
             fill #ddd
-            fill black
 
         .rect-background
             fill #ddd
@@ -155,6 +148,20 @@
             fill-opacity .5
             transition .4s
 
+    // .track-duration
+    &-duration
+        position absolute
+        left 100%
+        top 60px
+        margin-left 10px
+        font-size 13px
+
+    // .track-links
+    &-links
+        position absolute
+        top 0
+        right 0
+
     @media small
         trackImageSize = 80px
         // .track-image
@@ -174,3 +181,9 @@
         // .track-details
         &-details
             width calc(100% - 70px)
+
+        // .track-duration
+        &-duration
+            left auto
+            right 0
+            top 55px
