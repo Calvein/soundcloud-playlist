@@ -2,7 +2,6 @@ View = require('bamjs/view')
 
 tmpl = require('./index.jade')
 
-
 class Waveform extends View
     namespace: 'waveform'
 
@@ -18,7 +17,7 @@ class Waveform extends View
         @setupElements()
         @setupChart()
 
-        @model.getWaveform().done((waveform) =>
+        @model.getWaveform().then((waveform) =>
             @draw(waveform)
             @delegateEvents()
         )

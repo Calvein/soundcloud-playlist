@@ -23,7 +23,7 @@
         opacity 0
         transform translate(0, 40px)
 
-        .track-image
+        .track-play
             opacity 0
             transform translate(-20px, 0)
 
@@ -62,36 +62,53 @@
         transition .2s .2s
 
     trackImageSize = 100px
+    // .track-play
+    &-play
+        position absolute
+        width trackImageSize
+        height trackImageSize
+        padding 0
+        margin 0 4px 0 0
+        border 0
+        background linear-gradient(135deg, #e484be, #83a2b1)
+        z-index 1
+        transition .2s
+        &:after
+            opacity 0
+            content ''
+            position absolute
+            top 50%
+            left 50%
+            width 40px
+            height @width
+            line-height @height
+            border-radius 50%
+            margin-top (@height / -2)
+            margin-left (@width / -2)
+            background orange url('data:image/svg+xml;base64,' + play) no-repeat 50% 50% / 12px
+            font-size 24px
+            color white
+            cursor pointer
+            transition background-color .2s, opacity .2s
+        &:hover:after
+        &:focus:after
+        .playing &:after
+            opacity 1
+        &:active:after
+            background-color orange-dark
+        .playing &:after
+            background-image url('data:image/svg+xml;base64,' + pause)
+
+
     // .track-image
     &-image
         position absolute
-        width trackImageSize
-        margin-right 4px
-        border 1px solid #ccc
-        box-shadow 0 0 0 1px #eee
+        top 0
+        left 0
+        cursor pointer
 
     figcaption
         padding-left trackImageSize + 10
-
-    // .track-play
-    &-play
-    // .track-details
-    &-details
-        display inline-block
-        vertical-align top
-
-    // .track-play
-    &-play
-        width 40px
-        height @width
-        border-radius 50%
-        margin-right 10px
-        font-size 24px
-        cursor pointer
-        &:before
-            content '>'
-        .playing &:before
-            content '||'
 
     // .track-details
     &-details
@@ -108,6 +125,7 @@
 
         // .track-details-title
         &-title
+            display block
             font-weight bold
             color text-color
 
@@ -125,23 +143,20 @@
         &.drawn
             opacity 1
 
-        path
-            fill #ddd
-
         .rect-background
-            fill #ddd
+            fill #eaeaea
 
         .rect-buffered
-            fill #aaa
+            fill #ddd
 
         .rect-hovered
-            fill lighten(#bada55, 30%)
+            fill lighten(orange, 30%)
             transition .3s
             &.hidden
                 opacity 0
 
         .rect-played
-            fill #bada55
+            fill url(#gradient-played)
 
         .rect-overlay
             fill #fafafa

@@ -1,8 +1,8 @@
 for track in tracks
     li(data-track=track.id).track.showing: figure
-        img(src=track.getImage()).track-image
+        button.track-play
+            img(src=track.getImage()).track-image
         figcaption
-            button.track-play
             .track-details
                 a(href=track.getUrl('user')).track-details-user= track.getUsername()
                 a(href=track.getUrl()).track-details-title= track.getTitle()
@@ -20,3 +20,8 @@ for track in tracks
                 data-link='delete'
                 title='Remove track from queue'
             ) ×
+
+svg
+    linearGradient(id='gradient-played', x2='0%', y2='100%')
+        stop(offset='0%',   style='stop-color:#ff6800')
+        stop(offset='100%', style='stop-color:#ff3400')
