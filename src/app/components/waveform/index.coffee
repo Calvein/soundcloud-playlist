@@ -18,8 +18,8 @@ class Waveform extends View
         @setupElements()
         @setupChart()
 
-        @model.getWaveform().done(=>
-            @draw(@model.getWaveform())
+        @model.getWaveform().done((waveform) =>
+            @draw(waveform)
             @delegateEvents()
         )
 
@@ -121,6 +121,7 @@ class Waveform extends View
     resize: (e) ->
         @resizeWidth()
         @groups.clipPath.select('path').attr('d', @area)
+
 
     # Events #
     click: (e) ->
