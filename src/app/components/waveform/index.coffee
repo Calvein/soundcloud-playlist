@@ -10,6 +10,8 @@ class Waveform extends View
         'mousemove': 'mousemove'
         'mouseleave': 'mouseleave'
 
+    simplification: 5
+
     initialize: (options) ->
         @undelegateEvents()
         @$el.html(tmpl())
@@ -73,7 +75,7 @@ class Waveform extends View
             .range([0, 100])
         # The data comes from the waveform and it's an array of 1800 values
         @x = d3.scale.linear()
-            .domain([0, 1800])
+            .domain([0, 1800 / @simplification])
         # Simple waveform from an area
         @y = d3.scale.linear()
             .range([0, @height / 2])
@@ -88,7 +90,16 @@ class Waveform extends View
 
         @x.range([0, @width])
 
-    draw: (data) ->
+    draw: (rawData) ->
+        # Simplify the data
+        data = []
+        for d, i in rawData
+            if i % @simplification is 0
+                if i > 0
+                    data.push(simpD / @simplification)
+                simpD = 0
+            simpD += d
+
         @resizeWidth()
 
         @groups.clipPath.append('path')

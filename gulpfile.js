@@ -76,6 +76,7 @@ function scriptCompile(cb) {
 function templateCompile(cb) {
     var locals = {
         env: env
+      , portLr: portLr
     }
 
     gulp.src(jadeFile)

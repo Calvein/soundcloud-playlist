@@ -26,6 +26,7 @@
     "browserify-jade": "^0.1.1",
     "coffeeify": "^0.7.0",
     "connect": "^3.1.1",
+    "connect-livereload": "^0.5.3",
     "growl": "^1.8.1",
     "gulp": "^3.8.7",
     "gulp-coffee": "^2.1.1",
