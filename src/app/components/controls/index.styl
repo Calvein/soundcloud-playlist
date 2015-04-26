@@ -2,6 +2,11 @@ controls-height = 45px
 controls-bg = #f2f2f2
 controls-border-color = #cecece
 
+$show-volume-slider
+    transform rotate(270deg) translate(120px, -45px)
+    opacity 1
+    pointer-events all
+
 .controls
     position fixed
     bottom 0
@@ -89,13 +94,13 @@ controls-border-color = #cecece
         position relative
         &:hover
             .controls-volume-slider
-                transform rotate(270deg) translate(120px, -45px)
-                opacity 1
-                pointer-events all
+                @extend $show-volume-slider
 
         button
             display block
             background-position 10px 50%
+            &:focus + *
+                @extend $show-volume-slider
 
         // .controls-volume-slider
         &-slider
@@ -123,7 +128,6 @@ controls-border-color = #cecece
 
     // .controls-title
     &-title
-        //                 padding    buttons    title
         width 250px
         line-height controls-height
         white-space nowrap
