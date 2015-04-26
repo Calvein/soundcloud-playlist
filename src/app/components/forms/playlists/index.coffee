@@ -4,7 +4,6 @@ soundcloudUrlData = require('../../../modules/soundcloud-url-data')
 
 tmpl = require('./index.jade')
 
-
 class PlaylistForm extends View
     namespace: 'playlist-form'
 

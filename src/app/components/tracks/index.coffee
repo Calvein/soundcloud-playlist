@@ -7,7 +7,6 @@ TracksCollection = require('../../models/tracks')
 
 tmpl = require('./index.jade')
 
-
 class Tracks extends View
     namespace: 'tracks'
 

@@ -1,5 +1,6 @@
-controls-bg = #f2f2f2
 controls-height = 45px
+controls-bg = #f2f2f2
+controls-border-color = #cecece
 
 .controls
     position fixed
@@ -7,13 +8,13 @@ controls-height = 45px
     left 0
     right 0
     padding 0 20px
-    border-top 1px solid #cecece
+    border-top 1px solid controls-border-color
     background controls-bg
     transform translate(0, 0)
     transition .2s
     z-index 1
-    // &.init
-    //     transform translate(0, 100px)
+    &.init
+        transform translate(0, 100px)
 
     > *
         display inline-block
@@ -51,18 +52,83 @@ controls-height = 45px
         background-image getImage('next')
     [data-button=shuffle]
         background-image getImage('shuffle')
+    [data-button=volume]
+        background-image getImage('volume-normal')
+        &[data-state=max]
+            background-image getImage('volume-max')
+        &[data-state=mute]
+            background-image getImage('volume-mute')
 
     // .controls-timeline
     &-timeline
-        width calc(100% - 700px)
+        //                 padding    buttons    title
+        width calc(100% - (20px * 2 + 40px * 4 + 250px))
+
+        > *
+            display inline-block
+            vertical-align middle
+
+        // .controls-timeline-current
+        &-current
+        // .controls-timeline-duration
+        &-duration
+            font-size 14px
+            width 60px
+
+        // .controls-timeline-current
+        &-current
+            color orange
+            text-align right
+
+        // .controls-timeline-slider
+        &-slider
+            width calc(100% - (60px * 2))
+
+    // .controls-volume
+    &-volume
+        position relative
+        &:hover
+            .controls-volume-slider
+                transform rotate(270deg) translate(120px, -45px)
+                opacity 1
+                pointer-events all
+
+        button
+            display block
+            background-position 10px 50%
+
+        // .controls-volume-slider
+        &-slider
+            position absolute
+            width 120px
+            padding 6px 8px 4px
+            border 1px solid controls-border-color
+            background controls-bg
+            transform rotate(270deg) translate(60px, -45px) scale(.8)
+            opacity 0
+            pointer-events none
+            transition .2s
+            &:before
+            &:after
+                position absolute
+                content ''
+                border solid transparent
+                border-width 9px 9px 9px 0
+            &:before
+                left -9px
+                border-right-color controls-border-color
+            &:after
+                left -8px
+                border-right-color controls-bg
 
     // .controls-title
     &-title
+        //                 padding    buttons    title
+        width 250px
         line-height controls-height
         white-space nowrap
         overflow hidden
         text-overflow ellipsis
-        font-weight bold
         text-decoration none
         color text-color
 

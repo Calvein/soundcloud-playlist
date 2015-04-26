@@ -4,7 +4,6 @@ Filter = require('./filter')
 
 tmpl = require('./index.jade')
 
-
 class Forms extends View
     namespace: 'forms'
 

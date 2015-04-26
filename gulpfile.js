@@ -36,7 +36,7 @@ var stylusFile = './src/index.styl'
 // For watch
 var stylusFiles = [
     stylusFile
-  , './src/app/components/**/*.styl'
+  , './src/app/**/*.styl'
 ]
 
 /* Compile functions */

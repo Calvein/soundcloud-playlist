@@ -4,5 +4,13 @@ audio
     button(data-button='play')
     button(data-button='next')
     button(data-button='shuffle')
-input(type='range', value=0).controls-timeline
+.controls-timeline
+    .controls-timeline-current
+    .controls-timeline-slider
+        input(type='range', max=100, value=0)
+    .controls-timeline-duration
+.controls-volume
+    button(data-button='volume', data-state='max')
+    .controls-volume-slider
+        input(type='range', max=100, value=100)
 a.controls-title(href='#')

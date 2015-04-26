@@ -1,25 +1,31 @@
 View = require('bamjs/view')
+formatTime = require('../../modules/format-time')
 
 tmpl = require('./index.jade')
-
 
 class Controls extends View
     namespace: 'controls'
 
     events:
         'click .controls-title': 'clickTitle'
-        'click [data-button=prev]': 'clickPrevTrack'
-        'click [data-button=play]': 'clickPlayTrack'
-        'click [data-button=next]': 'clickNextTrack'
-        'click [data-button=shuffle]': 'clickShuffleTracks'
-        'input .controls-timeline': 'inputTimeline'
+        'click [data-button=prev]': 'clickPrev'
+        'click [data-button=play]': 'clickPlay'
+        'click [data-button=next]': 'clickNext'
+        'click [data-button=shuffle]': 'clickShuffle'
+        'input .controls-timeline-slider input': 'inputTimelineSlider'
+        'click [data-button=volume]': 'clickVolume'
+        'input .controls-volume-slider input': 'inputVolumeSlider'
 
     initialize: ->
         @$el.html(tmpl())
 
         # Store elements
         @$title = @$('.controls-title')
-        @timeline = @$('.controls-timeline').get(0)
+        @timelineSlider = @$('.controls-timeline-slider input').get(0)
+        @$timelineCurrent = @$('.controls-timeline-current')
+        @$timelineDuration = @$('.controls-timeline-duration')
+        @$volume = @$('[data-button=volume]')
+        @volumeSlider = @$('.controls-volume-slider input').get(0)
         @root().$audio = @$audio = @$('audio')
         @root().audio =  @audio  = @$audio.get(0)
 
@@ -89,6 +95,26 @@ class Controls extends View
     # Can be negative
     addSeconds: (seconds) -> @audio.currentTime += seconds
 
+    currentVolume: 1
+    changeVolume: (volume) ->
+        if volume is 'toggle' or volume is 0
+            if @audio.volume is 0
+                volume = @currentVolume
+            else
+                volume = 0
+            @volumeSlider.value = volume * 100
+        else
+            @currentVolume = volume
+
+        @audio.volume = volume
+        switch volume
+            when 1
+                @$volume.attr('data-state', 'max')
+            when 0
+                @$volume.attr('data-state', 'mute')
+            else
+                @$volume.attr('data-state', null)
+
 
     # Listeners #
     setCurrent: (track, forcePlay) ->
@@ -108,7 +134,6 @@ class Controls extends View
         track.set('startPlaying', Date.parse(new Date().toUTCString()))
         # Duration has to be 30s mininum
         duration = track.getDuration()
-        @timeline.max = Math.round(duration / 1e3)
         if duration < 3e4
             @scrobbleIn = Infinity
         # We need to scrobble at at least 4 minutes played or half the song
@@ -116,6 +141,9 @@ class Controls extends View
             @scrobbleIn = Math.min(duration / 2 / 1e3, 4 * 60)
         @currentTime = null
         @root().trigger('lastfm:nowPlaying', track)
+
+        @timelineSlider.max = Math.round(duration / 1e3)
+        @$timelineDuration.text(track.getDuration('mm:ss'))
         @goTo(forcePlay)
 
     play: ->
@@ -131,13 +159,14 @@ class Controls extends View
         @currentTime = @audio.currentTime
 
     timeupdate: ->
+        currentTime = @audio.currentTime
         # Fist time playing
         if @currentTime is null
-            @currentTime = @audio.currentTime
+            @currentTime = currentTime
         # Change the scrobbled time
         else
-            @scrobbleIn -= @audio.currentTime - @currentTime
-            @currentTime = @audio.currentTime
+            @scrobbleIn -= currentTime - @currentTime
+            @currentTime = currentTime
 
         # When the user listen enough of the song (@see setCurrent)
         # we trigger the scrobbling
@@ -146,8 +175,9 @@ class Controls extends View
             @scrobbleIn = Infinity
             @root().trigger('lastfm:scrobble', @currentTrack)
 
-        @timeline.value = @audio.currentTime
-        @currentTrack.set('currentTime', @audio.currentTime)
+        @$timelineCurrent.text(formatTime(currentTime * 1e3, 'mm:ss'))
+        @timelineSlider.value = currentTime
+        @currentTrack.set('currentTime', currentTime)
 
     keydown: (e) ->
         return if $('input:focus').length
@@ -177,19 +207,26 @@ class Controls extends View
             scrollTop: @$currentTrack.offset().top - 10
         300)
 
-    clickPrevTrack: (e) ->
+    clickPrev: (e) ->
         @prevTrack()
 
-    clickPlayTrack: (e) ->
+    clickPlay: (e) ->
         @togglePlay()
 
-    clickNextTrack: (e) ->
+    clickNext: (e) ->
         @nextTrack(e)
 
-    clickShuffleTracks: (e) ->
+    clickShuffle: (e) ->
         @shuffleTracks()
 
-    inputTimeline: (e) ->
+    inputTimelineSlider: (e) ->
         @seek(e.currentTarget.value)
+
+    clickVolume: (e) ->
+        @changeVolume('toggle')
+
+    inputVolumeSlider: (e) ->
+        @changeVolume(e.currentTarget.value / 100)
+
 
 module.exports = Controls

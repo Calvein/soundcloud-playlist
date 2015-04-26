@@ -2,7 +2,6 @@ View = require('bamjs/view')
 
 tmpl = require('./index.jade')
 
-
 class FilterForm extends View
     namespace: 'filter-form'
 

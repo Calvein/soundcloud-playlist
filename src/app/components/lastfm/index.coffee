@@ -6,7 +6,6 @@ qs = require('querystring')
 
 tmpl = require('./index.jade')
 
-
 class Lastfm extends View
     namespace: 'lastfm'
 
