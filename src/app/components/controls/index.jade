@@ -1,6 +1,8 @@
 audio
 .controls-buttons
-    button(data-direction='prev') <<
-    button(data-direction='next') >>
-    button(data-type='shuffle') ⤭
+    button(data-button='prev')
+    button(data-button='play')
+    button(data-button='next')
+    button(data-button='shuffle')
+input(type='range', value=0).controls-timeline
 a.controls-title(href='#')

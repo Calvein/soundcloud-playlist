@@ -31,8 +31,6 @@
         .track-links
             opacity 0
             transform translate(0, 20px)
-
-
     // When track is hidden (filtered out)
     &.hidden
     // When track is deleted
@@ -85,19 +83,19 @@
             border-radius 50%
             margin-top (@height / -2)
             margin-left (@width / -2)
-            background orange url('data:image/svg+xml;base64,' + play) no-repeat 50% 50% / 12px
+            background orange getImage('track-play') no-repeat 50% 50% / 12px
             font-size 24px
             color white
             cursor pointer
             transition background-color .2s, opacity .2s
         &:hover:after
         &:focus:after
-        .playing &:after
+        .active &:after
             opacity 1
         &:active:after
             background-color orange-dark
         .playing &:after
-            background-image url('data:image/svg+xml;base64,' + pause)
+            background-image getImage('track-pause')
 
 
     // .track-image

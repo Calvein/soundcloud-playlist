@@ -1,0 +1,105 @@
+// Based on http://codepen.io/thebabydino/pen/vEdpmo by Ana Tudor <@anatudor>
+theme-base = #ccc
+track-width = 20em
+track-height = 1px
+thumb-size = 13px
+thumb-border = 3px
+
+// We can't use @extend because of unknown selectors errors
+track()
+    position relative
+    width track-width
+    height track-height
+    border none
+    background theme-base
+    &:before
+        content ''
+        position absolute
+        height track-height
+        width 100%
+        background orange
+
+track-focus()
+    background orange
+
+thumb()
+    position relative
+    border thumb-border solid controls-bg
+    width thumb-size
+    height thumb-size
+    border-radius 50%
+    background theme-base
+    transition .2s
+    &:before
+        content ''
+        position absolute
+        height track-height
+        width 10000px
+        top 50%
+        left thumb-size - thumb-border
+        margin-top track-height * -1
+        background theme-base
+
+thumb-focus()
+    border-color orange
+    background orange
+
+
+input[type=range]
+    position relative
+    display inline-block
+    vertical-align middle
+    height thumb-size
+    padding 0
+    margin 0
+    background transparent
+    overflow hidden
+    cursor pointer
+    &:after
+        content ''
+        position absolute
+        width (thumb-size / 2)
+        height 1px
+        top 50%
+        right 0
+        margin-top track-height * -1
+        background controls-bg
+    &
+    &::-webkit-slider-runnable-track
+    &::-webkit-slider-thumb
+        -webkit-appearance none
+    &::-webkit-slider-runnable-track
+        margin (0 thumb-size / 2)
+        track()
+    &::-moz-range-track
+        track()
+    &::-ms-track
+        margin (0 thumb-size / 2)
+        color transparent
+    &::-webkit-slider-thumb
+        margin-top ((track-height - thumb-size) / 2)
+        thumb()
+    &::-moz-range-thumb
+        thumb()
+    &::-ms-thumb
+        thumb()
+    &::-ms-fill-lower
+    &::-ms-fill-upper
+        background transparent
+    &::-ms-tooltip
+        display none
+    &:focus
+    &:active
+        outline none
+        &::-webkit-slider-runnable-track
+            track-focus()
+        &::-moz-range-track
+            track-focus()
+        &::-ms-fill-lower
+            background orange
+        &::-webkit-slider-thumb
+            thumb-focus()
+        &::-moz-range-thumb
+            thumb-focus()
+        &::-ms-thumb
+            thumb-focus()

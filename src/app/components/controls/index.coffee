@@ -8,15 +8,18 @@ class Controls extends View
 
     events:
         'click .controls-title': 'clickTitle'
-        'click [data-direction=prev]': 'prevTrack'
-        'click [data-direction=next]': 'nextTrack'
-        'click [data-type=shuffle]': 'shuffleTracks'
+        'click [data-button=prev]': 'clickPrevTrack'
+        'click [data-button=play]': 'clickPlayTrack'
+        'click [data-button=next]': 'clickNextTrack'
+        'click [data-button=shuffle]': 'clickShuffleTracks'
+        'input .controls-timeline': 'inputTimeline'
 
     initialize: ->
         @$el.html(tmpl())
 
-        # Init resusable elements
+        # Store elements
         @$title = @$('.controls-title')
+        @timeline = @$('.controls-timeline').get(0)
         @root().$audio = @$audio = @$('audio')
         @root().audio =  @audio  = @$audio.get(0)
 
@@ -59,6 +62,30 @@ class Controls extends View
         else
             @root().trigger('audio:pause')
 
+    prevTrack: ->
+        $track = @$currentTrack.prevAll(':not(.hidden)').first()
+        # Go to the last one if no prev track
+        unless $track.get(0)
+            $track = @$currentTrack.nextAll(':not(.hidden)').last()
+
+        track = $track.data('track')
+        @root().trigger('tracks:set', track)
+
+    nextTrack: (e) ->
+        $track = @$currentTrack.nextAll(':not(.hidden)').first()
+        # Go to the first one if no next track
+        unless $track.get(0)
+            $track = @$currentTrack.prevAll(':not(.hidden)').last()
+
+        track = $track.data('track')
+        @root().trigger('tracks:set', track, e.type is 'ended')
+
+    shuffleTracks: ->
+        @root().trigger('playlist:shuffle')
+
+        # Because we have to redraw the DOM
+        @$currentTrack = @currentTrack.$el
+
     # Can be negative
     addSeconds: (seconds) -> @audio.currentTime += seconds
 
@@ -81,6 +108,7 @@ class Controls extends View
         track.set('startPlaying', Date.parse(new Date().toUTCString()))
         # Duration has to be 30s mininum
         duration = track.getDuration()
+        @timeline.max = Math.round(duration / 1e3)
         if duration < 3e4
             @scrobbleIn = Infinity
         # We need to scrobble at at least 4 minutes played or half the song
@@ -90,9 +118,13 @@ class Controls extends View
         @root().trigger('lastfm:nowPlaying', track)
         @goTo(forcePlay)
 
-    play: -> @audio.play()
+    play: ->
+        @$el.addClass('playing')
+        @audio.play()
 
-    pause: -> @audio.pause()
+    pause: ->
+        @$el.removeClass('playing')
+        @audio.pause()
 
     seek: (time) ->
         @audio.currentTime = time
@@ -114,6 +146,7 @@ class Controls extends View
             @scrobbleIn = Infinity
             @root().trigger('lastfm:scrobble', @currentTrack)
 
+        @timeline.value = @audio.currentTime
         @currentTrack.set('currentTime', @audio.currentTime)
 
     keydown: (e) ->
@@ -144,29 +177,19 @@ class Controls extends View
             scrollTop: @$currentTrack.offset().top - 10
         300)
 
-    prevTrack: (e = {}) ->
-        $track = @$currentTrack.prevAll(':not(.hidden)').first()
-        # Go to the last one if no prev track
-        unless $track.get(0)
-            $track = @$currentTrack.nextAll(':not(.hidden)').last()
+    clickPrevTrack: (e) ->
+        @prevTrack()
 
-        track = $track.data('track')
-        @root().trigger('tracks:set', track)
+    clickPlayTrack: (e) ->
+        @togglePlay()
 
-    nextTrack: (e = {}) ->
-        $track = @$currentTrack.nextAll(':not(.hidden)').first()
-        # Go to the first one if no next track
-        unless $track.get(0)
-            $track = @$currentTrack.prevAll(':not(.hidden)').last()
+    clickNextTrack: (e) ->
+        @nextTrack(e)
 
-        track = $track.data('track')
-        @root().trigger('tracks:set', track, e.type is 'ended')
+    clickShuffleTracks: (e) ->
+        @shuffleTracks()
 
-    shuffleTracks: (e) ->
-        @root().trigger('playlist:shuffle')
-
-        # Because we have to redraw the DOM
-        @$currentTrack = @currentTrack.$el
-
+    inputTimeline: (e) ->
+        @seek(e.currentTarget.value)
 
 module.exports = Controls
