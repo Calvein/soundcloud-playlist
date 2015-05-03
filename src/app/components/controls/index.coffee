@@ -77,7 +77,7 @@ class Controls extends View
         track = $track.data('track')
         @root().trigger('tracks:set', track)
 
-    nextTrack: (e) ->
+    nextTrack: (e = {}) ->
         $track = @$currentTrack.nextAll(':not(.hidden)').first()
         # Go to the first one if no next track
         unless $track.get(0)
