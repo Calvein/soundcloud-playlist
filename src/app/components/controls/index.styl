@@ -137,11 +137,44 @@ $show-volume-slider
         color text-color
 
     @media small
+        controls-height = 35px
         width 100%
         right 0
+        padding 0 10px
+
+        button
+            width 30px
+            height controls-height
+            background-size 50%
 
         // .controls-title
         &-title
             width calc(100% - 90px)
+
+        // .controls-timeline
+        &-timeline
+            //                 buttons
+            width calc(100% - (30px * 4))
+
+            // .controls-timeline-current
+            &-current
+            // .controls-timeline-duration
+            &-duration
+                font-size 12px
+                width 40px
+
+            // .controls-timeline-slider
+            &-slider
+              width calc(100% - (40px * 2))
+
+        // .controls-title
+        &-title
+            display block
+            width 100%
+            line-height controls-height
+
+        // .controls-volume
+        &-volume
+            display none
 
 @require slider

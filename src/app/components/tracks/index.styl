@@ -79,7 +79,6 @@
             left 50%
             width 40px
             height @width
-            line-height @height
             border-radius 50%
             margin-top (@height / -2)
             margin-left (@width / -2)
@@ -176,24 +175,29 @@
         right 0
 
     @media small
-        trackImageSize = 80px
+        trackImageSize = 60px
+        // .track-play
+        &-play
+            width trackImageSize
+            height trackImageSize
+            bottom 0
+
         // .track-image
         &-image
             width trackImageSize
             height @width
 
         figcaption
-            padding-left trackImageSize + 10
-
-        // .track-play
-        &-play
-            width 30px
-            height @width
-            font-size 18px
+            padding-left 0
 
         // .track-details
         &-details
             width calc(100% - 70px)
+            margin-bottom 5px
+
+        // .track-waveform
+        &-waveform
+            padding-left trackImageSize + 10px
 
         // .track-duration
         &-duration
