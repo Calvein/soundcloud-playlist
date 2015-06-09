@@ -89,7 +89,11 @@ class Tracks extends View
             @root().trigger('tracks:set', @tracks.first())
 
     shuffleTracks: ->
-        @showTracks(@tracks.shuffle())
+        @tracks.remove(@currentTrack.id)
+        @tracks.shuffle()
+        @tracks.unshift(@currentTrack)
+
+        @showTracks(@tracks.models)
 
     filterTracks: (filter) ->
         reg = new RegExp(filter, 'i')
