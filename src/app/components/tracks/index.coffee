@@ -85,6 +85,9 @@ class Tracks extends View
 
         @showTracks(@tracks.models)
 
+        unless @currentTrack
+            @root().trigger('tracks:set', @tracks.first())
+
     shuffleTracks: ->
         @showTracks(@tracks.shuffle())
 

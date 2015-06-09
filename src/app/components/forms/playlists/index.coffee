@@ -23,8 +23,6 @@ class PlaylistForm extends View
             url: url
         ))
 
-        # Listeners #
-        @listenTo(@root(), 'playlist:get', @setPlaylist)
         @setPlaylist(url)
 
     setPlaylist: (url) ->
