@@ -8,6 +8,7 @@ class Track extends Model
     idAttribute: 'id'
     defaults:
         currentTime: 0
+        hidden: false
 
     getTitle: -> @get('title')
 
@@ -32,9 +33,27 @@ class Track extends Model
 
     getUsername: -> @get('user').username
 
+    isVisible: -> !@get('hidden')
+
     isDownloadable: -> @get('downloadable')
 
     getDownloadUrl: -> api.getTrackDownloadUrl(@get('download_url'))
+
+    getNextVisibleTrack: ->
+        track = @
+        loop
+            track = track.next()
+            break if !track or track.isVisible()
+
+        return track
+
+    getPreviousVisibleTrack: ->
+        track = @
+        loop
+            track = track.prev()
+            break if !track or track.isVisible()
+
+        return track
 
     parseType: 'ajax'
     # Canvas would be better but SoundCloud waveform aren't CORS friendly

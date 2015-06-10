@@ -36,23 +36,13 @@ class Tracks extends View
 
         # Store elements
         $tracks = @$('.track')
+        @setLayout($tracks, 40)
         setTimeout(->
             $tracks.removeClass('showing')
         )
 
-        # Make the track list sortable
-        @sortable = Sortable.create(@el,
-            animation: 100
-            # Toggle .sorting to prevent glitches caused by transitions
-            onStart: (e) =>
-                @$el.addClass('sorting')
-            onEnd: (e) =>
-                @$el.removeClass('sorting')
-        )
-        @resize()
-
         # Add the element to the track and vice-versa
-        for el in $tracks
+        for el, i in $tracks
             $track = $(el)
             track = @tracks.get($track.data('track'))
 
@@ -65,6 +55,26 @@ class Tracks extends View
                 model: track
                 parent: @
             )
+
+        @setLayout($tracks)
+
+        # Make the track list sortable
+        @sortable = Sortable.create(@el,
+            animation: 100
+            # Toggle .sorting to prevent glitches caused by transitions
+            onStart: (e) =>
+                @$el.addClass('sorting')
+            onEnd: (e) =>
+                @$el.removeClass('sorting')
+        )
+        @resize()
+
+    setLayout: ($els, yOffset=0) ->
+        trackHeight = 110
+        for el, i in $els
+            y = yOffset + trackHeight * i
+            $(el).css('transform', "translate(0, #{y}px)")
+
 
     # Listeners #
     setCurrent: (track) ->
@@ -90,18 +100,22 @@ class Tracks extends View
 
     shuffleTracks: ->
         @tracks.remove(@currentTrack.id)
-        @tracks.shuffle()
+        @tracks.models = @tracks.shuffle()
         @tracks.unshift(@currentTrack)
 
-        @showTracks(@tracks.models)
+        @setLayout(@tracks.getVisibleTracks().map((track) -> track.$el))
 
     filterTracks: (filter) ->
         reg = new RegExp(filter, 'i')
         for track in @tracks.models
             hasName  = reg.test(track.getUsername())
             hasTitle = reg.test(track.getTitle())
+            isHidden = !(hasName or hasTitle)
 
-            track.$el.toggleClass('hidden', !(hasName or hasTitle))
+            track.set('hidden', isHidden)
+            track.$el.toggleClass('hidden', isHidden)
+
+        @setLayout(@tracks.getVisibleTracks().map((track) -> track.$el))
 
     audioTimeupdate: (e) ->
         time = @root().audio.currentTime * 1e3
@@ -141,6 +155,7 @@ class Tracks extends View
         $track.one('transitionend', =>
             $track.remove()
             @tracks.remove(track)
+            @setLayout(@$('.track'))
         ).addClass('delete')
 
     deleteAllTracks: ->
