@@ -72,8 +72,9 @@ class Tracks extends View
     setLayout: ($els, yOffset=0) ->
         trackHeight = 110
         for el, i in $els
-            y = yOffset + trackHeight * i
-            $(el).css('transform', "translate(0, #{y}px)")
+            # We can't use transform because it's used for animations
+            # and CSS doesn't allow multiple transforms like SVG
+            $(el).css('top', yOffset + trackHeight * i)
 
 
     # Listeners #
@@ -104,6 +105,9 @@ class Tracks extends View
         @tracks.unshift(@currentTrack)
 
         @setLayout(@tracks.getVisibleTracks().map((track) -> track.$el))
+        $('html, body').animate(
+            scrollTop: 0
+        300)
 
     filterTracks: (filter) ->
         reg = new RegExp(filter, 'i')
@@ -115,7 +119,9 @@ class Tracks extends View
             track.set('hidden', isHidden)
             track.$el.toggleClass('hidden', isHidden)
 
-        @setLayout(@tracks.getVisibleTracks().map((track) -> track.$el))
+        setTimeout(=>
+            @setLayout(@tracks.getVisibleTracks().map((track) -> track.$el))
+        )
 
     audioTimeupdate: (e) ->
         time = @root().audio.currentTime * 1e3
