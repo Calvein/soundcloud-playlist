@@ -69,21 +69,19 @@ class Controls extends View
             @root().trigger('audio:pause')
 
     prevTrack: ->
-        $track = @$currentTrack.prevAll(':not(.hidden)').first()
+        track = @currentTrack.getPreviousVisibleTrack()
         # Go to the last one if no prev track
-        unless $track.get(0)
-            $track = @$currentTrack.nextAll(':not(.hidden)').last()
+        unless track
+            track = @currentTrack.collection().last()
 
-        track = $track.data('track')
         @root().trigger('tracks:set', track)
 
     nextTrack: (e = {}) ->
-        $track = @$currentTrack.nextAll(':not(.hidden)').first()
+        track = @currentTrack.getNextVisibleTrack()
         # Go to the first one if no next track
-        unless $track.get(0)
-            $track = @$currentTrack.prevAll(':not(.hidden)').last()
+        unless track
+            track = @currentTrack.collection().first()
 
-        track = $track.data('track')
         @root().trigger('tracks:set', track, e.type is 'ended')
 
     shuffleTracks: ->
