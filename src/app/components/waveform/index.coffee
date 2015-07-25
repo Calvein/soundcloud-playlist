@@ -80,6 +80,11 @@ class Waveform extends View
         @y = d3.scale.linear()
             .range([0, @height / 2])
 
+        @zeroArea = d3.svg.area()
+            .x((d, i)  => @x(i))
+            .y0((d, i) => @y(0))
+            .y1((d, i) => @y(2))
+
         @area = d3.svg.area()
             .x((d, i)  => @x(i))
             .y0((d, i) => @y(1 - d))
@@ -104,7 +109,10 @@ class Waveform extends View
 
         @groups.clipPath.append('path')
             .datum(data)
-            .attr('d', @area)
+            .attr('d', @zeroArea)
+            .transition()
+            .duration(400)
+                .attr('d', @area)
 
         @$el.addClass('drawn')
 
