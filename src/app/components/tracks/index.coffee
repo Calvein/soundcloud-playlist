@@ -36,7 +36,7 @@ class Tracks extends View
 
         # Store elements
         $tracks = @$('.track')
-        @setLayout($tracks, 40)
+        @setLayout(40)
         setTimeout(->
             $tracks.removeClass('showing')
         )
@@ -56,7 +56,7 @@ class Tracks extends View
                 parent: @
             )
 
-        @setLayout($tracks)
+        @setLayout()
 
         # Make the track list sortable
         @sortable = Sortable.create(@el,
@@ -69,9 +69,10 @@ class Tracks extends View
         )
         @resize()
 
-    setLayout: ($els, yOffset=0) ->
+    setLayout: (yOffset=0) ->
+        $tracks = @tracks.getVisibleTracks().map((track) -> track.$el)
         trackHeight = 110
-        for el, i in $els
+        for el, i in $tracks
             # We can't use transform because it's used for animations
             # and CSS doesn't allow multiple transforms like SVG
             $(el).css('top', yOffset + trackHeight * i)
@@ -104,7 +105,7 @@ class Tracks extends View
         @tracks.models = @tracks.shuffle()
         @tracks.unshift(@currentTrack)
 
-        @setLayout(@tracks.getVisibleTracks().map((track) -> track.$el))
+        @setLayout()
         $('html, body').animate(
             scrollTop: 0
         300)
@@ -120,7 +121,7 @@ class Tracks extends View
             track.$el.toggleClass('hidden', isHidden)
 
         setTimeout(=>
-            @setLayout(@tracks.getVisibleTracks().map((track) -> track.$el))
+            @setLayout()
         )
 
     audioTimeupdate: (e) ->
@@ -161,7 +162,7 @@ class Tracks extends View
         $track.one('transitionend', =>
             $track.remove()
             @tracks.remove(track)
-            @setLayout(@$('.track'))
+            @setLayout()
         ).addClass('delete')
 
     deleteAllTracks: ->
@@ -183,8 +184,7 @@ class Tracks extends View
         e.preventDefault()
         e.stopPropagation()
 
-        $track = $(e.currentTarget).parents('.track')
-        track = $track.data('track')
+        track = $(e.currentTarget).parents('.track').data('track')
         @deleteTrack(track)
 
 
