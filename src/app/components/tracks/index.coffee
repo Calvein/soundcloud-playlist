@@ -36,7 +36,6 @@ class Tracks extends View
 
         # Store elements
         $tracks = @$('.track')
-        @setLayout(40)
         setTimeout(->
             $tracks.removeClass('showing')
         )
@@ -56,8 +55,6 @@ class Tracks extends View
                 parent: @
             )
 
-        @setLayout()
-
         # Make the track list sortable
         @sortable = Sortable.create(@el,
             animation: 100
@@ -69,13 +66,13 @@ class Tracks extends View
         )
         @resize()
 
-    setLayout: (yOffset=0) ->
-        $tracks = @tracks.getVisibleTracks().map((track) -> track.$el)
-        trackHeight = 110
-        for el, i in $tracks
-            # We can't use transform because it's used for animations
-            # and CSS doesn't allow multiple transforms like SVG
-            $(el).css('top', yOffset + trackHeight * i)
+    setLayout: ->
+        $tracks = @tracks.getVisibleTracks().map((track) -> track.$el.detach())
+        for el in $tracks
+            # We detach and re-attach them because
+            # they can't be absolute because of the sorting
+            # they can't be translated because of animations
+            @$el.append(el)
 
 
     # Listeners #
@@ -120,10 +117,6 @@ class Tracks extends View
             track.set('hidden', isHidden)
             track.$el.toggleClass('hidden', isHidden)
 
-        setTimeout(=>
-            @setLayout()
-        )
-
     audioTimeupdate: (e) ->
         time = @root().audio.currentTime * 1e3
         @currentTrack.waveform.drawPlayed(time)
@@ -162,7 +155,6 @@ class Tracks extends View
         $track.one('transitionend', =>
             $track.remove()
             @tracks.remove(track)
-            @setLayout()
         ).addClass('delete')
 
     deleteAllTracks: ->
