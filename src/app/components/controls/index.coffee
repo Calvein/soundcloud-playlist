@@ -1,4 +1,5 @@
 View = require('bamjs/view')
+ipc = require('ipc')
 formatTime = require('../../modules/format-time')
 
 tmpl = require('./index.jade')
@@ -49,6 +50,13 @@ class Controls extends View
         @listenTo(@root(), 'audio:seek', @seek)
         @listenTo(@root(), 'audio:timeupdate', @timeupdate)
         @listenTo(@root(), 'keydown', @keydown)
+
+        # Media keys listeners
+        if ipc.on
+            ipc.on('togglePlay', @togglePlay)
+            ipc.on('stop', @pause)
+            ipc.on('nextTrack', @nextTrack)
+            ipc.on('previousTrack', @prevTrack)
 
     goTo: (forcePlay) ->
         @$title.text(@currentTrack.getTitle())

@@ -23,6 +23,10 @@ html(lang='en')
         - var suffix = 'js'
         if env !== 'dev'
             - suffix = 'min.' + suffix
-        script(src='//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.1/jquery.' + suffix)
-        script(src='//cdnjs.cloudflare.com/ajax/libs/d3/3.4.13/d3.' + suffix)
+        script(src='https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.6/d3.' + suffix)
+        script(src='https://cdnjs.cloudflare.com/ajax/libs/jquery/2.1.4/jquery.' + suffix)
+        script.
+            // For electron
+            if (window.process)
+                window.$ = window.jQuery = module.exports
         script(src='app.js')

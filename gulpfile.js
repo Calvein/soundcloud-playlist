@@ -42,7 +42,7 @@ var stylusFiles = [
 /* Compile functions */
 // Watchify bundle
 var bundle = null
-function scriptCompile(cb) {
+function scriptCompile(cb, isApp) {
     if (!bundle) {
         bundle = watchify(browserify(coffeeFile, {
             extensions: ['.coffee']
@@ -57,8 +57,13 @@ function scriptCompile(cb) {
         .on('update', function() {
             scriptCompile(function() {
                 triggerLr('all')
-            })
+            }, isApp)
         })
+    }
+
+    // Ignore electron's modules
+    if (!isApp) {
+        bundle.ignore('ipc')
     }
 
     var stream = bundle.bundle()
@@ -107,7 +112,7 @@ function triggerLr(type) {
 }
 
 /* Tasks functions */
-function build() {
+function build(isApp) {
     scriptCompile(done)
     templateCompile(done)
     styleCompile(done)
@@ -157,6 +162,9 @@ function watch() {
 /* Tasks */
 gulp.task('build', function() {
     build()
+})
+gulp.task('build-app', function() {
+    build(true)
 })
 
 gulp.task('serve', function() {

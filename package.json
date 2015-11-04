@@ -6,7 +6,9 @@
   "scripts": {
     "start": "gulp",
     "build": "gulp build --prod",
-    "publish": "npm run build && git commit -am 'Build' && git ps origin gh-pages"
+    "publish": "npm run build && git commit -am 'Build' && git ps origin gh-pages",
+    "start-app": "gulp build-app && electron main.js",
+    "build-app": "gulp build-app --prod"
   },
   "repository": {
     "type": "git",
@@ -28,8 +30,9 @@
     "coffeeify": "^0.7.0",
     "connect": "^3.1.1",
     "connect-livereload": "^0.5.3",
+    "electron-prebuilt": "^0.34.2",
     "growl": "^1.8.1",
-    "gulp": "^3.8.7",
+    "gulp": "^3.9.0",
     "gulp-coffee": "^2.1.1",
     "gulp-duration": "0.0.0",
     "gulp-jade": "^0.7.0",
